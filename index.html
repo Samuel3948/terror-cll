@@ -801,13 +801,13 @@
         // 🔥 CONFIGURACIÓN DE FIREBASE
         // ============================================
         const firebaseConfig = {
-            apiKey: "TU_API_KEY",
-            authDomain: "TU_APP.firebaseapp.com",
-            databaseURL: "https://TU_APP-default-rtdb.firebaseio.com",
-            projectId: "TU_APP",
-            storageBucket: "TU_APP.appspot.com",
-            messagingSenderId: "TU_SENDER_ID",
-            appId: "TU_APP_ID"
+            apiKey: "AIzaSyBETNbQ4SIPJcCZ09ziAjymtrYqm9RVVbw",
+            authDomain: "localizador-para-celulares.firebaseapp.com",
+            databaseURL: "https://localizador-para-celulares-default-rtdb.firebaseio.com",
+            projectId: "localizador-para-celulares",
+            storageBucket: "localizador-para-celulares.firebasestorage.app",
+            messagingSenderId: "113889504888",
+            appId: "1:113889504888:web:0ae20fb9fd7990b399c78d"
         };
         
         firebase.initializeApp(firebaseConfig);
@@ -1213,14 +1213,13 @@
         }
 
         // ============================================
-        // PANEL DE ADMINISTRACIÓN (CORREGIDO)
+        // PANEL DE ADMINISTRACIÓN
         // ============================================
         const adminDot = document.getElementById('adminDot');
         const adminPopup = document.getElementById('adminPopup');
         const adminClose = document.getElementById('adminClose');
         const adminContent = document.getElementById('adminContent');
         
-        // Función para abrir el panel admin
         function abrirPanelAdmin() {
             console.log('🔴 Abriendo panel admin...');
             adminPopup.classList.add('active');
@@ -1231,19 +1230,16 @@
             }
         }
         
-        // Eventos para abrir el panel
         adminDot.addEventListener('click', abrirPanelAdmin);
         adminDot.addEventListener('touchend', function(e) {
             e.preventDefault();
             abrirPanelAdmin();
         });
         
-        // Cerrar panel con la X
         adminClose.addEventListener('click', function() {
             adminPopup.classList.remove('active');
         });
         
-        // Cerrar panel haciendo clic fuera
         adminPopup.addEventListener('click', function(e) {
             if (e.target === adminPopup) {
                 adminPopup.classList.remove('active');
@@ -1263,7 +1259,6 @@
                 </div>
             `;
             
-            // Asignar eventos DESPUÉS de crear los elementos
             setTimeout(function() {
                 const passInput = document.getElementById('adminPassInput');
                 const loginBtn = document.getElementById('adminLoginBtn');
@@ -1328,7 +1323,6 @@
                 return;
             }
             
-            // Mostrar loading
             adminContent.innerHTML = `
                 <div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">
                     <div style="font-size:40px;margin-bottom:16px;">⏳</div>
@@ -1419,7 +1413,6 @@
             });
         }
 
-        // Funciones globales para los botones del admin
         window.actualizarPanel = function() {
             renderAdminPanel();
         };
@@ -1482,7 +1475,7 @@
         console.log('✅ Localizador de Celulares - SAMUEL_PDH');
         console.log('🔐 Contraseña acceso:', ADMIN_PASSWORD);
         console.log('🔐 Contraseña admin:', ADMIN_PASSWORD);
-        console.log('🟢 Sistema listo y funcional');
+        console.log('🟢 Firebase conectado y listo');
         console.log('📱 Toca el punto rojo para abrir el panel admin');
     </script>
 </body>
