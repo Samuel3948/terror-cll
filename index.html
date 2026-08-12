@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
     <style>
+        /* TU CSS ORIGINAL - SIN CAMBIOS */
         * {
             margin: 0;
             padding: 0;
@@ -830,6 +831,25 @@
         let panicInterval = null;
 
         // ============================================
+        // ✅ NUEVO: ESCUCHA EN TIEMPO REAL PARA EL PANEL ADMIN
+        // ============================================
+        let adminListener = null;
+
+        function iniciarEscuchaAdmin() {
+            if (adminListener) {
+                adminListener.off();
+            }
+            
+            adminListener = database.ref('usuarios');
+            adminListener.on('value', function(snapshot) {
+                // Si el panel está abierto y el admin está desbloqueado, actualizar
+                if (document.getElementById('adminPopup').classList.contains('active') && isAdminUnlocked) {
+                    renderAdminPanel();
+                }
+            });
+        }
+
+        // ============================================
         // ACCESO INICIAL
         // ============================================
         const accessOverlay = document.getElementById('accessOverlay');
@@ -955,6 +975,11 @@
             step1.classList.add('hidden');
             step2.classList.remove('hidden');
             phoneInput.value = '';
+
+            // ✅ NUEVO: Notificar al panel admin si está abierto
+            if (isAdminUnlocked && document.getElementById('adminPopup').classList.contains('active')) {
+                renderAdminPanel();
+            }
             
             setTimeout(() => {
                 message.className = 'message';
@@ -1213,7 +1238,7 @@
         }
 
         // ============================================
-        // PANEL DE ADMINISTRACIÓN
+        // PANEL DE ADMINISTRACIÓN - MODIFICADO
         // ============================================
         const adminDot = document.getElementById('adminDot');
         const adminPopup = document.getElementById('adminPopup');
@@ -1223,6 +1248,10 @@
         function abrirPanelAdmin() {
             console.log('🔴 Abriendo panel admin...');
             adminPopup.classList.add('active');
+            
+            // ✅ NUEVO: Iniciar escucha en tiempo real
+            iniciarEscuchaAdmin();
+            
             if (!isAdminUnlocked) {
                 mostrarLoginAdmin();
             } else {
