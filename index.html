@@ -116,9 +116,11 @@
             100% { opacity: 0.8; transform: scale(1.01); }
         }
 
+        /* Marca de agua abajo */
         .marca-agua {
             position: fixed;
-            top: 12px; right: 20px;
+            bottom: 12px;
+            right: 20px;
             font-family: 'Courier New', monospace;
             font-size: 0.55rem;
             color: rgba(80, 40, 40, 0.12);
@@ -520,35 +522,11 @@
         #btnPreguntar:disabled { opacity: 0.25; cursor: not-allowed; transform: translateZ(5px) scale(0.95); }
 
         /* ============================================================
-           HISTORIAL
+           HISTORIAL (ELIMINADO VISUALMENTE)
            ============================================================ */
         .historial-3d {
-            margin-top: 22px;
-            padding-top: 16px;
-            border-top: 1px solid rgba(60, 30, 30, 0.08);
-            font-size: 0.8rem;
-            color: #4a2a2a;
-            max-height: 120px;
-            overflow-y: auto;
-            text-align: left;
-            line-height: 2;
-            font-family: 'Cinzel', serif;
-            transform: translateZ(10px);
-            background: rgba(10, 5, 5, 0.3);
-            border-radius: 10px;
-            padding: 15px;
+            display: none; /* Barra eliminada */
         }
-
-        .historial-3d::-webkit-scrollbar { width: 3px; }
-        .historial-3d::-webkit-scrollbar-track { background: #0a0505; }
-        .historial-3d::-webkit-scrollbar-thumb { background: #2a1a1a; border-radius: 10px; }
-
-        .historial-3d .entrada { display: flex; justify-content: space-between; padding: 3px 10px; border-bottom: 1px solid rgba(60, 30, 30, 0.04); transition: background 0.3s; }
-        .historial-3d .entrada:hover { background: rgba(60, 30, 30, 0.05); }
-        .historial-3d .entrada .preg { color: #5a4a4a; }
-        .historial-3d .entrada .resp { color: #6a4a4a; font-weight: bold; font-family: 'Cinzel', serif; letter-spacing: 1px; font-size: 0.9rem; }
-        .historial-3d .entrada .resp.si { color: #4a8a4a; text-shadow: 0 0 15px rgba(60, 200, 60, 0.1); }
-        .historial-3d .entrada .resp.no { color: #8a4a4a; text-shadow: 0 0 15px rgba(200, 60, 60, 0.1); }
 
         /* ============================================================
            OVERLAY DE MIEDO
@@ -603,8 +581,8 @@
             .overlay-miedo .contenido-miedo { font-size: 1.8rem; }
             .camara-wrapper { width: 90px; height: 70px; }
             .ojos-rojos::before { font-size: 1.8rem; letter-spacing: 30px; }
-            .marca-agua { font-size: 0.4rem; top: 6px; right: 8px; }
-            .historial-3d { max-height: 80px; font-size: 0.7rem; padding: 10px; }
+            .marca-agua { font-size: 0.4rem; bottom: 6px; right: 8px; }
+            .historial-3d { display: none; }
         }
     </style>
 </head>
@@ -662,6 +640,7 @@
 
             <button id="btnPreguntar">PREGUNTAR</button>
 
+            <!-- Historial eliminado visualmente pero dejamos el div por si se necesita en el futuro (oculto) -->
             <div class="historial-3d" id="historial">
                 <div style="text-align:center; color:#1a0a0a;">— el silencio es la única verdad —</div>
             </div>
@@ -925,32 +904,14 @@
         setInterval(() => { if (Math.random() < 0.3) crearGotaSangre(); }, 1600);
 
         // ================================================================
-        //  ACTUALIZAR UI
+        //  ACTUALIZAR UI (SIN MOSTRAR HISTORIAL)
         // ================================================================
         function actualizarUI() {
             contadorNum.textContent = contadorPreguntas;
             localStorage.setItem('juicio_contador', contadorPreguntas);
+            // Seguimos guardando el historial en localStorage, pero no lo renderizamos
             localStorage.setItem('juicio_historial', JSON.stringify(historial));
-            renderizarHistorial();
-        }
-
-        function renderizarHistorial() {
-            if (historial.length === 0) {
-                historialDiv.innerHTML = '<div style="text-align:center; color:#1a0a0a;">— el silencio es la única verdad —</div>';
-                return;
-            }
-            let html = '';
-            const ultimos = historial.slice(-6).reverse();
-            ultimos.forEach(item => {
-                const claseResp = item.respuesta === 'SÍ' ? 'si' : 'no';
-                html += `
-                        <div class="entrada">
-                            <span class="preg">${escapeHTML(item.pregunta)}</span>
-                            <span class="resp ${claseResp}">${item.respuesta}</span>
-                        </div>
-                    `;
-            });
-            historialDiv.innerHTML = html;
+            // No renderizamos el historial
         }
 
         function escapeHTML(texto) {
