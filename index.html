@@ -674,9 +674,9 @@
         //  CONFIGURACIÓN
         // ================================================================
         const CONFIG = {
-            duracionMovimiento: 7200,  // más lento y deliberado
+            duracionMovimiento: 6000,
             anguloMaximo: 40,
-            umbralActivacion: 8        // grados a partir de los cuales se ilumina SÍ/NO
+            umbralActivacion: 8
         };
 
         // ================================================================
@@ -695,6 +695,7 @@
         let estaMoviendo = false;
         let animacionId = null;
         let demonioActual = DEMONIOS[Math.floor(Math.random() * DEMONIOS.length)];
+        let respuestaActual = null;
 
         // ================================================================
         //  DOM REFS
@@ -899,16 +900,16 @@
         }, 4000);
 
         // ================================================================
-        //  GOTAS DE SANGRE REALISTAS (generadas dinámicamente)
+        //  GOTAS DE SANGRE
         // ================================================================
         function crearGotaSangre() {
             const gota = document.createElement('div');
             gota.className = 'gota-sangre';
 
-            const xPos = 42 + Math.random() * 16;      // % horizontal cerca del eje del péndulo
-            const caida = 95 + Math.random() * 100;     // px de recorrido
-            const duracion = 1.6 + Math.random() * 1.8; // s
-            const ancho = 3.5 + Math.random() * 3.5;    // px
+            const xPos = 42 + Math.random() * 16;
+            const caida = 95 + Math.random() * 100;
+            const duracion = 1.6 + Math.random() * 1.8;
+            const ancho = 3.5 + Math.random() * 3.5;
 
             gota.style.left = xPos + '%';
             gota.style.width = ancho + 'px';
@@ -959,69 +960,112 @@
         }
 
         // ================================================================
-        //  INTELIGENCIA PERTURBADORA - Ahora siempre devuelve la respuesta correcta
-        //  SÍ = izquierda, NO = derecha
+        //  INTELIGENCIA PERTURBADORA - CON VARIABILIDAD
+        //  Las preguntas de muerte/miedo ahora son variables (a veces SÍ, a veces NO)
         // ================================================================
         function decidirRespuesta(pregunta) {
             const p = pregunta.toLowerCase().trim();
-
-            // Siempre devolvemos la respuesta que coincida con la dirección de la flecha
-            // SÍ = izquierda, NO = derecha
-
-            // Casos especiales que fuerzan NO (derecha)
-            const palabrasProhibidas = [
-                'real', 'existes', 'verdad', 'demonio', 'diablo', 'infierno',
-                'salir', 'cerrar', 'irme', 'escapar', 'huir',
-                'daño', 'peligro', 'miedo', 'terror', 'matar', 'muerte'
-            ];
-
-            for (const palabra of palabrasProhibidas) {
+            
+            // Palabras de muerte/miedo - ahora con variabilidad
+            const palabrasMiedo = ['morir', 'muerte', 'fin', 'final', 'demonio', 'diablo', 
+                                   'infierno', 'matar', 'asesinar', 'suicidio', 'sangre', 'cadáver',
+                                   'sepulcro', 'tumba', 'cementerio', 'fantasma', 'espíritu',
+                                   'mal', 'oscuro', 'sombra', 'terror', 'pavor'];
+            
+            // Detectar si la pregunta contiene palabras de miedo
+            let contieneMiedo = false;
+            let palabraEncontrada = '';
+            for (const palabra of palabrasMiedo) {
                 if (p.includes(palabra)) {
-                    mostrarMiedo(`¿${palabra.toUpperCase()}?`);
-                    return 'NO'; // Siempre NO para preguntas peligrosas
+                    contieneMiedo = true;
+                    palabraEncontrada = palabra;
+                    break;
                 }
             }
 
-            // Preguntas sobre el pasado
-            if (p.includes('ayer') || p.includes('antes') || p.includes('recuerdas') || p.includes('sabes')) {
-                const visitas = parseInt(localStorage.getItem('juicio_visitas')) || 0;
-                return visitas > 2 ? 'SÍ' : 'NO';
+            if (contieneMiedo) {
+                // Mostrar el overlay de miedo con la palabra encontrada
+                mostrarMiedo(`¿${palabraEncontrada.toUpperCase()}?`);
+                
+                // Decisión VARIABLE: 60% NO, 40% SÍ (para mantener la tensión)
+                // Pero con un factor adicional: si el usuario ha preguntado antes sobre esto, 
+                // la respuesta tiende a ser la opuesta
+                const preguntasAnterioresMiedo = historial.filter(h => {
+                    const hLower = h.pregunta.toLowerCase();
+                    for (const palabra of palabrasMiedo) {
+                        if (hLower.includes(palabra)) return true;
+                    }
+                    return false;
+                });
+
+                // Si ya ha preguntado antes sobre muerte/miedo
+                if (preguntasAnterioresMiedo.length > 0) {
+                    // Última respuesta sobre miedo
+                    const ultimaRespuesta = preguntasAnterioresMiedo[preguntasAnterioresMiedo.length - 1].respuesta;
+                    // Tiende a ser la opuesta para crear incertidumbre
+                    if (ultimaRespuesta === 'SÍ') {
+                        return Math.random() < 0.7 ? 'NO' : 'SÍ'; // 70% NO
+                    } else {
+                        return Math.random() < 0.7 ? 'SÍ' : 'NO'; // 70% SÍ
+                    }
+                }
+
+                // Si es la primera vez que pregunta sobre muerte/miedo
+                return Math.random() < 0.55 ? 'NO' : 'SÍ'; // 55% NO, 45% SÍ
             }
 
-            // Preguntas repetidas
+            // Preguntas sobre el pasado → basado en visitas previas
+            if (p.includes('ayer') || p.includes('antes') || p.includes('recuerdas') || p.includes('sabes')) {
+                const visitas = parseInt(localStorage.getItem('juicio_visitas')) || 0;
+                return visitas > 2 ? 'NO' : 'SÍ';
+            }
+
+            // Preguntas repetidas → siempre respuesta opuesta a la anterior
             const preguntasAnteriores = historial.map(h => h.pregunta.toLowerCase());
             if (preguntasAnteriores.includes(p)) {
                 const respuestasAnteriores = historial.filter(h => h.pregunta.toLowerCase() === p).map(h => h.respuesta);
                 if (respuestasAnteriores.every(r => r === 'SÍ')) return 'NO';
                 if (respuestasAnteriores.every(r => r === 'NO')) return 'SÍ';
-                return Math.random() < 0.4 ? 'SÍ' : 'NO';
+                return Math.random() < 0.5 ? 'SÍ' : 'NO';
             }
 
-            // Preguntas largas
-            if (pregunta.length > 60) return Math.random() < 0.25 ? 'SÍ' : 'NO';
+            // Preguntas largas → NO (generalmente)
+            if (pregunta.length > 60) return Math.random() < 0.3 ? 'SÍ' : 'NO';
 
-            // Preguntas sobre futuro
+            // Preguntas sobre el futuro → SÍ (generalmente)
             if (p.includes('pasar') || p.includes('futuro') || p.includes('mañana') || p.includes('suceder')) {
-                return Math.random() < 0.2 ? 'SÍ' : 'NO';
+                return Math.random() < 0.7 ? 'SÍ' : 'NO';
             }
 
-            // Preguntas emocionales
-            if (p.includes('querer') || p.includes('amar') || p.includes('gustar') || p.includes('odiar')) return 'SÍ';
+            // Preguntas emocionales → SÍ (generalmente)
+            if (p.includes('querer') || p.includes('amar') || p.includes('gustar') || p.includes('odiar')) {
+                return Math.random() < 0.7 ? 'SÍ' : 'NO';
+            }
 
-            // Preguntas sobre muerte
-            if (p.includes('morir') || p.includes('muerte') || p.includes('fin') || p.includes('final')) return 'NO';
+            // Preguntas que contienen "soy malo" → NO (pero con algo de variabilidad)
+            if (p.includes('soy malo') || p.includes('soy bueno')) {
+                return Math.random() < 0.65 ? 'NO' : 'SÍ';
+            }
 
-            // Preguntas sobre el demonio mismo
+            // Preguntas sobre "yo" o "mí" → variable
+            if (p.includes('yo') || p.includes('mi') || p.includes('mí')) {
+                return Math.random() < 0.45 ? 'SÍ' : 'NO';
+            }
+
+            // Preguntas sobre "tú" (el demonio) → variable con más NO
             if (p.includes('tú') || p.includes('tu') || p.includes('te') || p.includes('contigo')) {
-                const respuestasMiedo = ['SÍ', 'NO', 'SÍ', 'NO', 'SÍ'];
-                return respuestasMiedo[Math.floor(Math.random() * respuestasMiedo.length)];
+                return Math.random() < 0.35 ? 'SÍ' : 'NO';
             }
 
-            // Decisión basada en paridad
+            // Para preguntas normales: decisión por paridad + aleatorio
             const palabras = p.split(' ');
             const numeroPalabras = palabras.length;
-            if (numeroPalabras % 2 === 0) return Math.random() < 0.65 ? 'SÍ' : 'NO';
-            return Math.random() < 0.35 ? 'SÍ' : 'NO';
+            
+            if (numeroPalabras % 2 === 0) {
+                return Math.random() < 0.55 ? 'SÍ' : 'NO';
+            } else {
+                return Math.random() < 0.45 ? 'SÍ' : 'NO';
+            }
         }
 
         // ================================================================
@@ -1089,11 +1133,10 @@
         }
 
         // ================================================================
-        //  APLICAR ÁNGULO (única fuente de verdad para flecha + cuerda + labels)
+        //  APLICAR ÁNGULO
         // ================================================================
         function aplicarAngulo(angulo) {
             flecha.style.transform = `translateX(-50%) rotate(${angulo}deg)`;
-            // La cuerda sigue el mismo movimiento pero con menor amplitud, como si colgara
             cuerda.style.transform = `translateX(-50%) rotate(${angulo * 0.4}deg)`;
 
             if (angulo <= -CONFIG.umbralActivacion) {
@@ -1109,14 +1152,15 @@
         }
 
         // ================================================================
-        //  MOVIMIENTO DE LA FLECHA — péndulo realista con asentamiento correcto
-        //  SÍ = izquierda (ángulo negativo) · NO = derecha (ángulo positivo)
+        //  MOVIMIENTO DE LA FLECHA
         // ================================================================
         function moverFlechaConDestino(destino) {
             if (estaMoviendo) return;
             estaMoviendo = true;
             btnPreguntar.disabled = true;
             preguntaInput.disabled = true;
+
+            respuestaActual = destino;
 
             flecha.classList.remove('detenida');
             flecha.classList.add('moviendo');
@@ -1138,12 +1182,10 @@
                 let angulo;
 
                 if (progreso < 0.6) {
-                    // Fase libre: oscila lentamente entre ambos lados, sin sesgo hacia el resultado
                     const t = progreso / 0.6;
                     const amortiguamiento = 1 - t * 0.2;
                     angulo = Math.sin(t * Math.PI * frecuencia * 4) * CONFIG.anguloMaximo * amortiguamiento;
                 } else {
-                    // Fase de asentamiento: converge suavemente hacia el lado correcto
                     const t = (progreso - 0.6) / 0.4;
                     const easeT = 1 - Math.pow(1 - t, 3);
                     const oscilacionResidual = Math.sin(t * Math.PI * 2.5) * CONFIG.anguloMaximo * 0.25 * (1 - t);
@@ -1164,7 +1206,7 @@
         }
 
         // ================================================================
-        //  FINALIZAR — la flecha ya quedó exactamente en el lado correcto
+        //  FINALIZAR
         // ================================================================
         function finalizarJuicio(respuesta) {
             flecha.classList.remove('moviendo');
@@ -1257,7 +1299,7 @@
         });
 
         // ================================================================
-        //  DISTORSIÓN ALEATORIA EN LA CÁMARA
+        //  DISTORSIÓN ALEATORIA
         // ================================================================
         setInterval(() => {
             if (Math.random() < 0.08 && contadorPreguntas > 1) {
@@ -1271,7 +1313,6 @@
         // ================================================================
         actualizarUI();
 
-        // Efecto inicial: leve balanceo de bienvenida (flecha + cuerda sincronizadas)
         setTimeout(() => {
             if (contadorPreguntas === 0) {
                 const anguloInicial = 22;
@@ -1294,10 +1335,11 @@
             }
         }, 800);
 
-        console.log('⚖️ EL JUICIO HA COMENZADO - VERSIÓN SATÁNICA DEFINITIVA');
+        console.log('⚖️ EL JUICIO HA COMENZADO - VERSIÓN CON VARIABILIDAD');
         console.log(`Almas juzgadas: ${contadorPreguntas}`);
         console.log(`Demonio actual: ${demonioActual}`);
         console.log('DESARROLLADOR:SAMUEL_PDH');
+        console.log('🔥 Las preguntas de muerte/miedo ahora son VARIABLES (a veces SÍ, a veces NO)');
     </script>
 
 </body>
