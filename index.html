@@ -1,1511 +1,1288 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>🔍 Localizador de Celulares | SAMUEL_PDH</title>
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EL JUICIO - VERSIÓN SATÁNICA</title>
     <style>
-        /* TU CSS ORIGINAL - SIN CAMBIOS */
+        /* ============================================================
+           ESTILOS PRINCIPALES
+           ============================================================ */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
+
+        @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&family=Creepster&family=Cinzel:wght@400;700&display=swap');
 
         body {
-            background: linear-gradient(160deg, #0b1120, #1a2332);
+            background: #050505;
             min-height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
-            padding: 16px;
-        }
-
-        .watermark {
-            position: fixed;
-            bottom: 60px;
-            right: 20px;
-            color: rgba(255, 255, 255, 0.08);
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 2px;
-            z-index: 50;
-            pointer-events: none;
-            transform: rotate(-90deg);
-            transform-origin: right bottom;
-            white-space: nowrap;
-        }
-
-        .watermark-bottom {
-            position: fixed;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.06);
-            font-size: 11px;
-            font-weight: 500;
-            letter-spacing: 3px;
-            z-index: 50;
-            pointer-events: none;
-            white-space: nowrap;
-        }
-
-        .container {
-            max-width: 460px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 32px;
-            padding: 32px 24px;
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+            align-items: center;
+            font-family: 'Cinzel', serif;
+            overflow: hidden;
             position: relative;
+            cursor: default;
         }
 
-        .dev-badge {
-            text-align: center;
-            margin-top: 20px;
-            padding-top: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
-        }
-
-        .dev-badge span {
-            color: rgba(255, 255, 255, 0.15);
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 2px;
-        }
-
-        h1 {
-            color: #fff;
-            font-size: 26px;
-            text-align: center;
-            font-weight: 700;
-        }
-
-        .subtitle {
-            color: rgba(255, 255, 255, 0.4);
-            text-align: center;
-            font-size: 14px;
-            margin: 6px 0 24px;
-        }
-
-        .access-overlay {
+        body::before {
+            content: '';
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(20px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(60, 0, 0, 0.4) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 50%, rgba(0, 0, 40, 0.3) 0%, transparent 60%),
+                repeating-linear-gradient(45deg,
+                    rgba(255, 255, 255, 0.01) 0px,
+                    rgba(255, 255, 255, 0.01) 2px,
+                    transparent 2px,
+                    transparent 8px);
+            pointer-events: none;
+            z-index: 0;
+            animation: fondoLatido 8s infinite alternate;
+        }
+
+        @keyframes fondoLatido {
+            0% { opacity: 0.8; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.02); }
+        }
+
+        #particulasCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        /* ============================================================
+           CONTENEDOR 3D
+           ============================================================ */
+        .container-3d {
+            perspective: 1200px;
+            perspective-origin: 50% 50%;
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 820px;
             padding: 20px;
         }
 
-        .access-box {
-            background: #1a2332;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 28px;
-            padding: 40px 32px;
-            max-width: 420px;
-            width: 100%;
-            text-align: center;
+        .card-3d {
+            background: linear-gradient(145deg, rgba(15, 8, 8, 0.95), rgba(5, 2, 2, 0.98));
+            border: 1px solid rgba(80, 20, 20, 0.2);
+            border-radius: 30px;
+            padding: 40px 45px 50px;
+            transform: rotateX(5deg) rotateY(-2deg) translateZ(20px);
+            box-shadow:
+                0 0 80px rgba(100, 0, 0, 0.15),
+                0 0 150px rgba(50, 0, 0, 0.05),
+                inset 0 0 60px rgba(0, 0, 0, 0.8),
+                inset 0 0 100px rgba(30, 0, 0, 0.2);
             position: relative;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            backdrop-filter: blur(10px);
         }
 
-        .access-box .dev-signature {
+        .card-3d:hover {
+            transform: rotateX(3deg) rotateY(-1deg) translateZ(30px);
+            box-shadow:
+                0 0 120px rgba(100, 0, 0, 0.25),
+                0 0 200px rgba(50, 0, 0, 0.1),
+                inset 0 0 60px rgba(0, 0, 0, 0.8);
+        }
+
+        .card-3d::before {
+            content: '';
             position: absolute;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.08);
-            font-size: 9px;
-            letter-spacing: 2px;
-            font-weight: 500;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            border-radius: 32px;
+            background: linear-gradient(45deg, rgba(100, 0, 0, 0.1), transparent 30%, transparent 70%, rgba(100, 0, 0, 0.1));
+            z-index: -1;
+            animation: bordeInfernal 4s infinite alternate;
         }
 
-        .access-box .lock-icon { font-size: 56px; margin-bottom: 12px; }
-        .access-box h2 { color: #fff; font-size: 22px; font-weight: 600; margin-bottom: 4px; }
-        .access-box p { color: rgba(255, 255, 255, 0.3); font-size: 14px; margin-bottom: 20px; }
-
-        .access-box input {
-            width: 100%;
-            padding: 14px 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1.5px solid rgba(255, 255, 255, 0.06);
-            border-radius: 14px;
-            color: #fff;
-            outline: none;
-            text-align: center;
-            letter-spacing: 4px;
-            font-size: 20px;
+        @keyframes bordeInfernal {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 0.8; transform: scale(1.01); }
         }
 
-        .access-box input:focus {
-            border-color: #34d399;
-            box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.06);
-        }
-
-        .btn-access {
-            width: 100%;
-            padding: 15px;
-            margin-top: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #0b1120;
-            background: #34d399;
-            border: none;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: 0.25s;
-        }
-
-        .btn-access:hover { background: #6ee7b7; }
-
-        .terms-overlay {
+        .marca-agua {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(12px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            padding: 20px;
-        }
-
-        .terms-overlay.active { display: flex; }
-
-        .terms-box {
-            background: #1a2332;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 28px;
-            padding: 32px 28px;
-            max-width: 460px;
-            width: 100%;
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        .terms-box .dev-signature {
-            text-align: center;
-            margin-top: 10px;
-            color: rgba(255, 255, 255, 0.06);
-            font-size: 9px;
+            top: 12px; right: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.55rem;
+            color: rgba(80, 40, 40, 0.12);
             letter-spacing: 2px;
-        }
-
-        .terms-box h2 { color: #fff; font-size: 20px; text-align: center; margin-bottom: 4px; }
-        .terms-box .terms-sub { color: rgba(255,255,255,0.3); font-size: 12px; text-align: center; margin-bottom: 16px; }
-
-        .terms-scroll {
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 6px;
-            margin-bottom: 16px;
-            max-height: 280px;
-        }
-
-        .terms-scroll::-webkit-scrollbar { width: 4px; }
-        .terms-scroll::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-        }
-
-        .terms-text {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 12px;
-            line-height: 1.8;
-            text-align: justify;
-        }
-
-        .terms-text strong { color: rgba(255, 255, 255, 0.7); }
-        .terms-text .highlight { color: #34d399; }
-
-        .terms-check-group {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin: 4px 0 16px;
-        }
-
-        .terms-check-group input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            min-width: 18px;
-            margin-top: 2px;
-            accent-color: #34d399;
-            cursor: pointer;
-        }
-
-        .terms-check-group label {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 12px;
-            cursor: pointer;
-            line-height: 1.5;
-        }
-
-        .btn-accept {
-            width: 100%;
-            padding: 14px;
-            font-size: 15px;
-            font-weight: 600;
-            color: #0b1120;
-            background: #34d399;
-            border: none;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: 0.25s;
-        }
-
-        .btn-accept:hover { background: #6ee7b7; }
-        .btn-accept:disabled { opacity: 0.3; cursor: not-allowed; }
-
-        .btn-decline {
-            width: 100%;
-            padding: 12px;
-            font-size: 14px;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.3);
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            margin-top: 6px;
-        }
-
-        .input-group { margin-bottom: 16px; }
-
-        .input-group label {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 13px;
-            font-weight: 500;
-            display: block;
-            margin-bottom: 6px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 14px 16px;
-            font-size: 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1.5px solid rgba(255, 255, 255, 0.06);
-            border-radius: 14px;
-            color: #fff;
-            outline: none;
-            transition: 0.25s;
-        }
-
-        .input-group input:focus {
-            border-color: #34d399;
-            box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.06);
-        }
-
-        .btn-primary {
-            width: 100%;
-            padding: 15px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #0b1120;
-            background: #34d399;
-            border: none;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: 0.25s;
-        }
-
-        .btn-primary:hover { background: #6ee7b7; }
-        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-
-        .btn-secondary {
-            width: 100%;
-            padding: 14px;
-            font-size: 15px;
-            font-weight: 500;
-            color: #fff;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1.5px solid rgba(255, 255, 255, 0.06);
-            border-radius: 14px;
-            cursor: pointer;
-            margin-top: 8px;
-        }
-
-        .message {
-            padding: 12px 14px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 500;
-            margin: 14px 0 8px;
-            display: none;
-        }
-
-        .message.error {
-            display: block;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.12);
-            color: #fca5a5;
-        }
-
-        .message.success {
-            display: block;
-            background: rgba(52, 211, 153, 0.08);
-            border: 1px solid rgba(52, 211, 153, 0.1);
-            color: #6ee7b7;
-        }
-
-        .message.info {
-            display: block;
-            background: rgba(96, 165, 250, 0.06);
-            border: 1px solid rgba(96, 165, 250, 0.08);
-            color: #93c5fd;
-        }
-
-        .hidden { display: none !important; }
-
-        .complete-icon { text-align: center; font-size: 56px; margin-bottom: 12px; }
-        .complete-title { color: #fff; font-size: 22px; font-weight: 600; text-align: center; }
-        .complete-sub { color: rgba(255, 255, 255, 0.4); font-size: 14px; text-align: center; margin-top: 4px; }
-
-        .admin-dot {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 20px;
-            height: 20px;
-            background: #ef4444;
-            border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            cursor: pointer;
-            z-index: 100;
-            box-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
-            transition: 0.3s;
-            animation: adminPulse 2s infinite;
-        }
-
-        @keyframes adminPulse {
-            0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
-            50% { box-shadow: 0 0 40px rgba(239, 68, 68, 0.6); }
-        }
-
-        .admin-dot:hover { transform: scale(1.3); }
-
-        .admin-popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(12px);
-            z-index: 200;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .admin-popup.active { display: flex; }
-
-        .admin-box {
-            background: #1a2332;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 28px;
-            padding: 24px 20px;
-            max-width: 550px;
-            width: 100%;
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        .admin-box .dev-signature {
-            text-align: center;
-            margin-top: 12px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
-            color: rgba(255, 255, 255, 0.08);
-            font-size: 9px;
-            letter-spacing: 2px;
-        }
-
-        .admin-box .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        .admin-box .header h3 { color: #fff; font-size: 20px; }
-
-        .admin-box .header .close-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: none;
-            color: rgba(255, 255, 255, 0.5);
-            width: 36px;
-            height: 36px;
-            border-radius: 12px;
-            font-size: 20px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .admin-box .header .close-btn:hover {
-            background: rgba(239, 68, 68, 0.2);
-            color: #fca5a5;
-        }
-
-        .admin-scroll {
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .admin-scroll::-webkit-scrollbar { width: 4px; }
-        .admin-scroll::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.06);
-            border-radius: 10px;
-        }
-
-        .user-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            border-radius: 18px;
-            padding: 16px;
-            margin-bottom: 14px;
-        }
-
-        .user-card .user-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .user-card .phone { color: #fff; font-size: 18px; font-weight: 700; }
-        .user-card .date { color: rgba(255, 255, 255, 0.25); font-size: 11px; }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .status-badge.active { background: rgba(52, 211, 153, 0.15); color: #34d399; }
-        .status-badge.inactive { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
-
-        .section-title {
-            color: rgba(255, 255, 255, 0.3);
-            font-size: 11px;
-            font-weight: 600;
+            z-index: 999;
+            pointer-events: none;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin: 10px 0 8px;
+            user-select: none;
+            font-weight: 300;
+            transition: opacity 0.5s;
+            text-shadow: 0 0 20px rgba(100, 0, 0, 0.05);
         }
+        .marca-agua:hover { opacity: 0.5; }
 
-        .action-buttons {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-        }
-
-        .action-buttons button {
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        .btn-sound { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
-        .btn-vibrate { background: linear-gradient(135deg, #34d399, #10b981); color: #0b1120; }
-        .btn-bright { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0b1120; }
-        .btn-flash { background: linear-gradient(135deg, #60a5fa, #3b82f6); color: #fff; }
-        .btn-voice { background: linear-gradient(135deg, #a78bfa, #8b5cf6); color: #fff; }
-        .btn-photo { background: linear-gradient(135deg, #fb923c, #f97316); color: #fff; }
-        .btn-gps { background: linear-gradient(135deg, #06b6d4, #0891b2); color: #fff; }
-        .btn-lock { background: linear-gradient(135deg, #6b7280, #4b5563); color: #fff; }
-        .btn-panic { background: linear-gradient(135deg, #dc2626, #991b1b); color: #fff; animation: panicPulse 1s infinite; }
-        .btn-unlock { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
-
-        @keyframes panicPulse {
-            0%, 100% { box-shadow: 0 0 10px rgba(220, 38, 38, 0.5); }
-            50% { box-shadow: 0 0 30px rgba(220, 38, 38, 0.8); }
-        }
-
-        .action-buttons button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .action-buttons button:active { transform: translateY(0); }
-
-        .stop-actions {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .btn-stop-all {
-            background: rgba(239, 68, 68, 0.3);
-            border: 1px solid rgba(239, 68, 68, 0.5);
-            color: #fff;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            grid-column: 1 / -1;
-        }
-
-        .btn-del {
-            background: rgba(255, 255, 255, 0.05);
-            color: rgba(255, 255, 255, 0.4);
-            padding: 10px;
-            border: none;
-            border-radius: 10px;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        .admin-pass input {
-            width: 100%;
-            padding: 12px 14px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1.5px solid rgba(255, 255, 255, 0.06);
-            border-radius: 12px;
-            color: #fff;
-            font-size: 15px;
-            outline: none;
-            margin-bottom: 10px;
-        }
-
-        .admin-actions {
-            margin-top: 12px;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .btn-clear {
-            background: rgba(239, 68, 68, 0.08);
-            color: #fca5a5;
-            border: none;
-            flex: 1;
-            padding: 10px;
-            font-size: 12px;
-            font-weight: 500;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-
-        .btn-refresh {
-            background: rgba(255, 255, 255, 0.04);
-            color: rgba(255, 255, 255, 0.4);
-            border: none;
-            flex: 1;
-            padding: 10px;
-            font-size: 12px;
-            font-weight: 500;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-
-        .empty-state {
+        .titulo-principal {
             text-align: center;
-            padding: 40px 20px;
-            color: rgba(255, 255, 255, 0.2);
+            font-family: 'Cinzel', serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: 8px;
+            color: #5a2a2a;
+            text-shadow: 0 0 30px rgba(100, 0, 0, 0.4), 0 0 60px rgba(50, 0, 0, 0.2), 0 4px 0 #1a0a0a;
+            margin-bottom: 2px;
+            transform: translateZ(30px);
+            position: relative;
+            animation: tituloLatido 3s infinite alternate;
         }
 
-        .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
-        .empty-state .empty-text { font-size: 14px; }
+        @keyframes tituloLatido {
+            0% { text-shadow: 0 0 30px rgba(100, 0, 0, 0.4), 0 0 60px rgba(50, 0, 0, 0.2), 0 4px 0 #1a0a0a; transform: translateZ(30px) scale(1); }
+            100% { text-shadow: 0 0 50px rgba(150, 0, 0, 0.6), 0 0 100px rgba(80, 0, 0, 0.3), 0 4px 0 #1a0a0a; transform: translateZ(35px) scale(1.02); }
+        }
 
-        .listening-badge {
+        .titulo-principal::after {
+            content: '⚖️';
+            position: absolute;
+            font-size: 2rem;
+            top: -20px; right: 30px;
+            animation: parpadeoEstrella 2s infinite alternate;
+            filter: drop-shadow(0 0 20px rgba(100, 50, 0, 0.2));
+        }
+
+        .demonio-actual {
+            text-align: center;
+            font-family: 'Creepster', cursive;
+            font-size: 1.5rem;
+            color: #ff4444;
+            letter-spacing: 3px;
+            margin: 10px 0;
+            text-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            animation: demonioAparece 1s ease-out;
+        }
+
+        @keyframes demonioAparece {
+            0% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .subtitulo-siniestro {
+            text-align: center;
+            color: #3a2a2a;
+            font-size: 0.85rem;
+            letter-spacing: 8px;
+            border-bottom: 1px solid rgba(60, 30, 30, 0.15);
+            padding-bottom: 18px;
+            margin-bottom: 22px;
+            text-transform: uppercase;
+            font-family: 'Cinzel', serif;
+        }
+
+        @keyframes parpadeoEstrella {
+            0% { opacity: 0.3; transform: scale(0.9) rotate(0deg); }
+            100% { opacity: 1; transform: scale(1.1) rotate(10deg); }
+        }
+
+        .camara-wrapper {
+            position: relative;
+            width: 140px; height: 105px;
+            margin: 0 auto 18px;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(60, 20, 20, 0.2);
+            box-shadow: 0 0 40px rgba(100, 0, 0, 0.1), inset 0 0 40px rgba(0, 0, 0, 0.9);
+            transform: rotateY(2deg) translateZ(10px);
+            opacity: 0.6;
+            transition: all 0.5s;
+        }
+
+        .camara-wrapper:hover {
+            opacity: 0.9;
+            transform: rotateY(0deg) translateZ(25px) scale(1.02);
+            box-shadow: 0 0 60px rgba(100, 0, 0, 0.2);
+        }
+
+        #video {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            filter: grayscale(1) contrast(1.5) brightness(0.5) blur(1px);
+        }
+
+        .ojos-rojos {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 5;
+            background:
+                radial-gradient(ellipse at 35% 40%, rgba(180, 0, 0, 0.15) 0%, transparent 40%),
+                radial-gradient(ellipse at 65% 40%, rgba(180, 0, 0, 0.15) 0%, transparent 40%);
+            animation: ojosLatido 3s infinite alternate;
+            mix-blend-mode: screen;
+        }
+
+        .ojos-rojos::before {
+            content: '◉ ◉';
+            position: absolute; top: 35%; left: 50%;
+            transform: translateX(-50%);
+            font-size: 2.8rem;
+            color: rgba(150, 0, 0, 0.08);
+            letter-spacing: 50px;
+            filter: blur(8px);
+            animation: ojosParpadeo 4s infinite;
+        }
+
+        @keyframes ojosLatido { 0% { opacity: 0.3; transform: scale(1); } 100% { opacity: 0.8; transform: scale(1.1); } }
+        @keyframes ojosParpadeo { 0%, 90%, 100% { opacity: 0.08; } 95% { opacity: 0.3; } }
+
+        .sombras-camara {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 4;
+            background: radial-gradient(ellipse at 50% 80%, rgba(0, 0, 0, 0.6) 0%, transparent 50%);
+            animation: sombrasMovimiento 6s infinite alternate;
+        }
+
+        .sombras-camara::after {
+            content: '';
+            position: absolute; top: 10%; left: 10%; width: 80%; height: 80%;
+            background:
+                radial-gradient(ellipse at 30% 60%, rgba(20, 0, 0, 0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 60%, rgba(20, 0, 0, 0.3) 0%, transparent 50%);
+            filter: blur(15px);
+            animation: sombrasForma 8s infinite alternate;
+        }
+
+        @keyframes sombrasMovimiento { 0% { transform: scale(1) translateX(0); opacity: 0.3; } 100% { transform: scale(1.1) translateX(-5%); opacity: 0.8; } }
+        @keyframes sombrasForma { 0% { transform: scale(1) rotate(0deg); opacity: 0.3; } 100% { transform: scale(1.3) rotate(5deg); opacity: 0.9; } }
+
+        .distorsion-camara {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 6;
+            background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 4px);
+            animation: distorsionGlitch 0.1s infinite;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .distorsion-camara.activa { opacity: 0.5; animation: distorsionGlitch 0.05s infinite; }
+
+        @keyframes distorsionGlitch {
+            0% { transform: translateY(0); } 20% { transform: translateY(-5px); } 40% { transform: translateY(5px); }
+            60% { transform: translateY(-3px); } 80% { transform: translateY(3px); } 100% { transform: translateY(0); }
+        }
+
+        .contador-3d {
+            text-align: center; font-size: 0.8rem; color: #4a2a2a;
+            letter-spacing: 3px; margin-bottom: 12px; font-family: 'Cinzel', serif;
+        }
+        .contador-3d span { color: #6a3a3a; font-size: 1rem; font-weight: bold; }
+
+        .pregunta-3d { margin: 12px 0 18px; transform: translateZ(15px); }
+
+        #preguntaInput {
+            width: 100%;
+            background: rgba(10, 5, 5, 0.8);
+            border: none;
+            border-bottom: 2px solid rgba(60, 20, 20, 0.15);
+            color: #a08a8a;
+            font-size: 1.2rem;
+            font-family: 'Cinzel', serif;
+            padding: 14px 10px;
+            outline: none;
+            text-align: center;
+            transition: all 0.5s;
+            border-radius: 5px 5px 0 0;
+            text-shadow: 0 0 10px rgba(100, 50, 50, 0.1);
+            letter-spacing: 1px;
+        }
+
+        #preguntaInput::placeholder { color: #3a2a2a; font-style: italic; font-size: 0.9rem; letter-spacing: 2px; }
+
+        #preguntaInput:focus {
+            border-bottom-color: rgba(120, 30, 30, 0.3);
+            background: rgba(15, 8, 8, 0.9);
+            box-shadow: 0 5px 30px rgba(100, 0, 0, 0.05);
+            color: #b09a9a;
+        }
+
+        /* ============================================================
+           FLECHA PENDULAR
+           ============================================================ */
+        .flecha-3d-wrapper {
+            position: relative;
+            height: 210px;
+            margin: 25px 0 22px;
             display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 8px;
-            padding: 12px;
-            background: rgba(52, 211, 153, 0.08);
-            border: 1px solid rgba(52, 211, 153, 0.15);
-            border-radius: 12px;
-            margin-top: 12px;
+            transform: translateZ(20px);
+            perspective: 800px;
         }
 
-        .listening-dot {
-            width: 8px;
-            height: 8px;
-            background: #34d399;
+        .opciones-3d {
+            display: flex;
+            justify-content: space-between;
+            width: 92%;
+            position: relative;
+            height: 100%;
+            align-items: center;
+        }
+
+        .opcion {
+            font-family: 'Cinzel', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: 6px;
+            transition: all 0.35s ease;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            transform: translateZ(10px);
+            position: relative;
+        }
+
+        .opcion.si { color: #2a5a2a; transform: translateZ(10px) rotateY(-5deg); text-shadow: 0 0 30px rgba(0, 100, 0, 0.1); }
+        .opcion.no { color: #5a2a2a; transform: translateZ(10px) rotateY(5deg); text-shadow: 0 0 30px rgba(100, 0, 0, 0.1); }
+
+        .opcion.si.activo {
+            color: #6aff6a !important;
+            text-shadow: 0 0 60px rgba(80, 255, 80, 0.4), 0 0 120px rgba(80, 255, 80, 0.2) !important;
+            transform: translateZ(50px) rotateY(-8deg) scale(1.15) !important;
+            filter: drop-shadow(0 0 30px rgba(80, 255, 80, 0.2));
+        }
+
+        .opcion.no.activo {
+            color: #ff6a6a !important;
+            text-shadow: 0 0 60px rgba(255, 80, 80, 0.4), 0 0 120px rgba(255, 80, 80, 0.2) !important;
+            transform: translateZ(50px) rotateY(8deg) scale(1.15) !important;
+            filter: drop-shadow(0 0 30px rgba(255, 80, 80, 0.2));
+        }
+
+        /* La cuerda cuelga desde el punto de fijación y gira junto con la flecha */
+        .cuerda {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(80, 30, 30, 0.4), rgba(120, 50, 50, 0.6) 50%, rgba(80, 30, 30, 0.4));
+            transform-origin: top center;
+            transform: translateX(-50%) rotate(0deg);
+            z-index: 1;
+            box-shadow: 0 0 20px rgba(100, 50, 50, 0.3);
+            animation: cuerdaTension 3s infinite alternate;
+            will-change: transform;
+        }
+
+        @keyframes cuerdaTension {
+            0% { box-shadow: 0 0 20px rgba(100, 50, 50, 0.3); }
+            100% { box-shadow: 0 0 30px rgba(150, 50, 50, 0.4); }
+        }
+
+        .punto-fijacion {
+            position: absolute;
+            top: -10px; left: 50%;
+            transform: translateX(-50%);
+            width: 12px; height: 12px;
+            background: radial-gradient(circle, #3a1a1a, #1a0a0a);
             border-radius: 50%;
-            animation: listeningPulse 1.5s infinite;
+            z-index: 2;
+            box-shadow: 0 0 20px rgba(100, 50, 50, 0.5);
         }
 
-        @keyframes listeningPulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.3; transform: scale(0.8); }
+        #flechaPendulo {
+            position: absolute;
+            top: 15%; left: 50%;
+            transform: translateX(-50%) rotate(0deg);
+            transform-origin: top center;
+            font-size: 5rem;
+            z-index: 10;
+            transition: none;
+            pointer-events: none;
+            line-height: 1;
+            filter: drop-shadow(0 0 30px rgba(150, 0, 0, 0.4));
+            text-shadow: 0 0 40px rgba(200, 0, 0, 0.3);
+            will-change: transform;
         }
 
-        .listening-text {
-            color: #34d399;
-            font-size: 12px;
-            font-weight: 500;
+        #flechaPendulo::before {
+            content: '';
+            position: absolute;
+            top: 30%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px; height: 100px;
+            background: radial-gradient(circle, rgba(150, 0, 0, 0.2) 0%, rgba(100, 0, 0, 0.1) 30%, transparent 70%);
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(15px);
+            animation: auraSangrienta 2s infinite alternate;
         }
 
-        @media (max-width: 420px) {
-            .container { padding: 24px 16px; }
-            h1 { font-size: 20px; }
-            .user-card .action-buttons { grid-template-columns: repeat(2, 1fr); }
+        @keyframes auraSangrienta { 0% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; } 100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.7; } }
+
+        #flechaPendulo.moviendo { color: #8a3a3a; text-shadow: 0 0 60px rgba(200, 50, 50, 0.3); }
+        #flechaPendulo.detenida { color: #ff3333; text-shadow: 0 0 80px rgba(255, 0, 0, 0.5), 0 0 160px rgba(255, 0, 0, 0.2); filter: drop-shadow(0 0 40px rgba(255, 0, 0, 0.3)); }
+
+        /* ============================================================
+           GOTAS DE SANGRE (realistas, generadas dinámicamente)
+           ============================================================ */
+        .gotas-contenedor {
+            position: absolute;
+            top: 42%;
+            left: 0;
+            width: 100%;
+            height: 58%;
+            pointer-events: none;
+            z-index: 12;
+            overflow: visible;
+        }
+
+        .gota-sangre {
+            position: absolute;
+            top: 0;
+            border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
+            background: radial-gradient(circle at 32% 28%, #d24545 0%, #8a1010 55%, #4a0808 100%);
+            box-shadow: 0 0 4px rgba(120, 0, 0, 0.6), 0 0 1px rgba(255, 120, 120, 0.4) inset;
+            opacity: 0;
+            animation-name: gotaCaer;
+            animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+            animation-fill-mode: forwards;
+        }
+
+        .gota-sangre::after {
+            content: '';
+            position: absolute;
+            top: 12%; left: 22%;
+            width: 25%; height: 20%;
+            background: rgba(255, 180, 180, 0.5);
+            border-radius: 50%;
+            filter: blur(0.4px);
+        }
+
+        @keyframes gotaCaer {
+            0%   { transform: translateY(0) scaleY(0.5) scaleX(0.9); opacity: 0; }
+            8%   { opacity: 0.95; transform: translateY(2%) scaleY(0.8) scaleX(1); }
+            70%  { opacity: 0.9;  transform: translateY(var(--caida, 130px)) scaleY(1.4) scaleX(0.85); }
+            88%  { opacity: 0.7;  transform: translateY(calc(var(--caida, 130px) + 5px)) scaleY(0.6) scaleX(1.6); }
+            100% { opacity: 0;    transform: translateY(calc(var(--caida, 130px) + 3px)) scaleY(0.25) scaleX(2.1); }
+        }
+
+        /* ============================================================
+           BOTÓN 3D
+           ============================================================ */
+        #btnPreguntar {
+            background: linear-gradient(145deg, rgba(30, 15, 15, 0.9), rgba(10, 5, 5, 0.95));
+            border: 1px solid rgba(80, 30, 30, 0.15);
+            color: #6a4a4a;
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            padding: 16px 55px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            transform: translateZ(15px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(80, 30, 30, 0.1);
+            margin-top: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #btnPreguntar::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle at center, rgba(120, 30, 30, 0.05) 0%, transparent 70%);
+            animation: girarBrillo 12s linear infinite;
+        }
+
+        @keyframes girarBrillo { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #btnPreguntar:hover:not(:disabled) {
+            background: linear-gradient(145deg, rgba(50, 20, 20, 0.95), rgba(20, 10, 10, 0.98));
+            border-color: rgba(140, 40, 40, 0.3);
+            color: #9a6a6a;
+            box-shadow: 0 10px 60px rgba(100, 0, 0, 0.2), inset 0 1px 0 rgba(140, 40, 40, 0.2);
+            transform: translateZ(30px) scale(1.03);
+        }
+
+        #btnPreguntar:disabled { opacity: 0.25; cursor: not-allowed; transform: translateZ(5px) scale(0.95); }
+
+        /* ============================================================
+           HISTORIAL
+           ============================================================ */
+        .historial-3d {
+            margin-top: 22px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(60, 30, 30, 0.08);
+            font-size: 0.8rem;
+            color: #4a2a2a;
+            max-height: 120px;
+            overflow-y: auto;
+            text-align: left;
+            line-height: 2;
+            font-family: 'Cinzel', serif;
+            transform: translateZ(10px);
+            background: rgba(10, 5, 5, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .historial-3d::-webkit-scrollbar { width: 3px; }
+        .historial-3d::-webkit-scrollbar-track { background: #0a0505; }
+        .historial-3d::-webkit-scrollbar-thumb { background: #2a1a1a; border-radius: 10px; }
+
+        .historial-3d .entrada { display: flex; justify-content: space-between; padding: 3px 10px; border-bottom: 1px solid rgba(60, 30, 30, 0.04); transition: background 0.3s; }
+        .historial-3d .entrada:hover { background: rgba(60, 30, 30, 0.05); }
+        .historial-3d .entrada .preg { color: #5a4a4a; }
+        .historial-3d .entrada .resp { color: #6a4a4a; font-weight: bold; font-family: 'Cinzel', serif; letter-spacing: 1px; font-size: 0.9rem; }
+        .historial-3d .entrada .resp.si { color: #4a8a4a; text-shadow: 0 0 15px rgba(60, 200, 60, 0.1); }
+        .historial-3d .entrada .resp.no { color: #8a4a4a; text-shadow: 0 0 15px rgba(200, 60, 60, 0.1); }
+
+        /* ============================================================
+           OVERLAY DE MIEDO
+           ============================================================ */
+        .overlay-miedo {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.94);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            perspective: 800px;
+            backdrop-filter: blur(30px);
+        }
+        .overlay-miedo.visible { display: flex; }
+
+        .overlay-miedo .contenido-miedo {
+            text-align: center;
+            font-family: 'Cinzel', serif;
+            color: #5a2a2a;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 8px;
+            transform: rotateX(10deg) translateZ(60px);
+            animation: temblorMiedo 0.08s infinite alternate;
+            text-shadow: 0 0 80px rgba(100, 0, 0, 0.4), 0 0 160px rgba(50, 0, 0, 0.15);
+        }
+
+        .overlay-miedo .contenido-miedo .sub-miedo {
+            font-size: 1.2rem; color: #3a1a1a; margin-top: 20px;
+            font-family: 'Cinzel', serif; letter-spacing: 4px;
+        }
+
+        @keyframes temblorMiedo {
+            0% { transform: rotateX(10deg) translateZ(60px) translateX(-3px); }
+            100% { transform: rotateX(10deg) translateZ(60px) translateX(3px); }
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 600px) {
+            .card-3d { padding: 20px 15px 25px; transform: rotateX(2deg) rotateY(0deg) translateZ(10px); }
+            .titulo-principal { font-size: 2rem; letter-spacing: 5px; }
+            .titulo-principal::after { font-size: 1.2rem; top: -12px; right: 10px; }
+            .demonio-actual { font-size: 1.2rem; }
+            .opcion { font-size: 2rem; letter-spacing: 3px; }
+            #flechaPendulo { font-size: 3.5rem; top: 20%; }
+            .flecha-3d-wrapper { height: 160px; }
+            #preguntaInput { font-size: 1rem; padding: 12px 8px; }
+            #btnPreguntar { font-size: 1rem; padding: 12px 30px; letter-spacing: 3px; }
+            .overlay-miedo .contenido-miedo { font-size: 1.8rem; }
+            .camara-wrapper { width: 90px; height: 70px; }
+            .ojos-rojos::before { font-size: 1.8rem; letter-spacing: 30px; }
+            .marca-agua { font-size: 0.4rem; top: 6px; right: 8px; }
+            .historial-3d { max-height: 80px; font-size: 0.7rem; padding: 10px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- MARCAS DE AGUA -->
-    <div class="watermark">DESARROLLADOR: SAMUEL_PDH</div>
-    <div class="watermark-bottom">© SAMUEL_PDH - LOCALIZADOR DE CELULARES</div>
+    <canvas id="particulasCanvas"></canvas>
 
-    <!-- ACCESS OVERLAY -->
-    <div class="access-overlay" id="accessOverlay">
-        <div class="access-box">
-            <div class="lock-icon">🔐</div>
-            <h2>Acceso Restringido</h2>
-            <p>Ingresa la contraseña para continuar</p>
-            <input type="password" id="accessPassword" placeholder="••••••••" maxlength="30" autocomplete="off">
-            <button class="btn-access" id="btnAccess">Acceder</button>
-            <div id="accessError" style="color:#fca5a5;font-size:14px;margin-top:10px;display:none;">❌ Contraseña incorrecta</div>
-            <div class="dev-signature">DESARROLLADOR: SAMUEL_PDH</div>
+    <div class="marca-agua">DESARROLLADOR:SAMUEL_PDH</div>
+
+    <div class="overlay-miedo" id="overlayMiedo">
+        <div class="contenido-miedo">
+            <div id="textoMiedo">NO DEBISTE PREGUNTAR ESO</div>
+            <div class="sub-miedo">...AHORA SI ESTOY AQUÍ</div>
         </div>
     </div>
 
-    <!-- TERMS OVERLAY -->
-    <div class="terms-overlay" id="termsOverlay">
-        <div class="terms-box">
-            <h2>📋 Términos y Condiciones</h2>
-            <p class="terms-sub">Lee atentamente antes de continuar</p>
+    <div class="container-3d">
+        <div class="card-3d">
 
-            <div class="terms-scroll">
-                <div class="terms-text">
-                    <strong>1. Propósito del Servicio</strong><br>
-                    Esta herramienta te permite registrar tu dispositivo para que, en caso de pérdida, puedas localizarlo mediante vibración, sonido, bloqueo de pantalla y otras funciones remotas.<br><br>
+            <div class="titulo-principal">EL JUICIO</div>
+            <div class="demonio-actual" id="demonioActual">HOY TE COMUNICASTE CON: BELZEBÚ</div>
+            <div class="subtitulo-siniestro">— la balanza decidirá —</div>
 
-                    <strong>2. Datos Recopilados</strong><br>
-                    Proporcionas voluntariamente tu número de teléfono. Este se almacena de forma segura en Firebase y solo el administrador autorizado tiene acceso.<br><br>
+            <div class="camara-wrapper" id="camaraWrapper">
+                <video id="video" autoplay muted playsinline></video>
+                <div class="ojos-rojos"></div>
+                <div class="sombras-camara"></div>
+                <div class="distorsion-camara" id="distorsionCamara"></div>
+            </div>
 
-                    <strong>3. Funciones de Localización y Seguridad</strong><br>
-                    Al aceptar, permites que este dispositivo reciba comandos remotos de: <strong class="highlight">vibración, sonido, brillo de pantalla, linterna, voz, GPS, cámara, bloqueo de pantalla y modo pánico</strong>.<br><br>
+            <div class="contador-3d">
+                ALMAS JUZGADAS: <span id="contadorNum">0</span>
+            </div>
 
-                    <strong>4. Ubicación</strong><br>
-                    Puedes compartir tu ubicación GPS para facilitar la búsqueda.<br><br>
+            <div class="pregunta-3d">
+                <input
+                type="text"
+                id="preguntaInput"
+                placeholder="Escribe tu pregunta..."
+                autocomplete="off"
+                maxlength="100"
+                />
+            </div>
 
-                    <strong>5. Seguridad</strong><br>
-                    En caso de pérdida, el administrador puede bloquear la pantalla y activar el modo pánico para proteger tus datos.<br><br>
-
-                    <strong>6. Desarrollador</strong><br>
-                    <strong class="highlight">DESARROLLADOR: SAMUEL_PDH</strong><br><br>
-
-                    <em>Última actualización: Agosto 2026</em>
+            <div class="flecha-3d-wrapper">
+                <div class="cuerda" id="cuerda"></div>
+                <div class="punto-fijacion"></div>
+                <div class="opciones-3d">
+                    <span class="opcion si" id="labelSi">SÍ</span>
+                    <span class="opcion no" id="labelNo">NO</span>
                 </div>
+                <div id="flechaPendulo">▼</div>
+                <div class="gotas-contenedor" id="gotasContenedor"></div>
             </div>
 
-            <div class="terms-check-group">
-                <input type="checkbox" id="termsAccept">
-                <label for="termsAccept">
-                    ✅ Acepto los términos y autorizo el envío de comandos remotos a este dispositivo.
-                </label>
+            <button id="btnPreguntar">PREGUNTAR</button>
+
+            <div class="historial-3d" id="historial">
+                <div style="text-align:center; color:#1a0a0a;">— el silencio es la única verdad —</div>
             </div>
 
-            <button class="btn-accept" id="btnAcceptTerms" disabled>✅ Aceptar y Continuar</button>
-            <button class="btn-decline" id="btnDeclineTerms">❌ No acepto</button>
-            <div class="dev-signature">DESARROLLADOR: SAMUEL_PDH</div>
-        </div>
-    </div>
-
-    <!-- ADMIN DOT -->
-    <div class="admin-dot" id="adminDot" title="Panel de Administración"></div>
-
-    <!-- ADMIN POPUP -->
-    <div class="admin-popup" id="adminPopup">
-        <div class="admin-box">
-            <div class="header">
-                <h3>🔐 Panel de Control</h3>
-                <button class="close-btn" id="adminClose">✕</button>
-            </div>
-            <div class="admin-scroll" id="adminContent"></div>
-            <div class="dev-signature">DESARROLLADOR: SAMUEL_PDH</div>
-        </div>
-    </div>
-
-    <!-- MAIN APP -->
-    <div class="container" id="mainApp" style="display:none;">
-        <h1>📍 Localizador de Celulares</h1>
-        <p class="subtitle">Registra tu número para proteger tu dispositivo</p>
-
-        <div id="step1">
-            <div class="input-group">
-                <label for="phoneInput">📱 Tu número de teléfono</label>
-                <input type="tel" id="phoneInput" placeholder="Ej: 573001234567" autocomplete="tel-national">
-                <div style="color:rgba(255,255,255,0.2);font-size:11px;margin-top:4px;">Incluye código de país (57 para Colombia)</div>
-            </div>
-            <button class="btn-primary" id="btnRegister">🔒 Registrar mi dispositivo</button>
-            <div id="message" class="message"></div>
-            <div id="listeningIndicator" class="listening-badge hidden">
-                <div class="listening-dot"></div>
-                <span class="listening-text">🟢 Dispositivo protegido - Esperando comandos...</span>
-            </div>
-        </div>
-
-        <div id="step2" class="hidden">
-            <div class="complete-icon">✅</div>
-            <div class="complete-title">¡Dispositivo Protegido!</div>
-            <div class="complete-sub">Tu celular está registrado. Si lo pierdes, podemos ayudarte a encontrarlo.</div>
-            <div style="margin-top:20px;padding:14px;background:rgba(255,255,255,0.02);border-radius:14px;border:1px solid rgba(255,255,255,0.04);text-align:center;">
-                <p style="color:rgba(255,255,255,0.3);font-size:12px;">📳 Vibración • 🔊 Sonido • 💡 Brillo • 🔦 Linterna • 📍 GPS • 📸 Cámara • 🔒 Bloqueo • 🚨 Modo Pánico</p>
-            </div>
-            <div id="listeningIndicator2" class="listening-badge">
-                <div class="listening-dot"></div>
-                <span class="listening-text">🟢 Dispositivo protegido - Esperando comandos...</span>
-            </div>
-            <button class="btn-secondary" id="btnReset">🔄 Registrar otro número</button>
-        </div>
-
-        <div class="dev-badge">
-            <span>DESARROLLADOR: SAMUEL_PDH</span>
         </div>
     </div>
 
     <script>
-        // ============================================
-        // 🔥 CONFIGURACIÓN DE FIREBASE
-        // ============================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyBETNbQ4SIPJcCZ09ziAjymtrYqm9RVVbw",
-            authDomain: "localizador-para-celulares.firebaseapp.com",
-            databaseURL: "https://localizador-para-celulares-default-rtdb.firebaseio.com",
-            projectId: "localizador-para-celulares",
-            storageBucket: "localizador-para-celulares.firebasestorage.app",
-            messagingSenderId: "113889504888",
-            appId: "1:113889504888:web:0ae20fb9fd7990b399c78d"
+        // ================================================================
+        //  CONFIGURACIÓN
+        // ================================================================
+        const CONFIG = {
+            duracionMovimiento: 7200,  // más lento y deliberado
+            anguloMaximo: 40,
+            umbralActivacion: 8        // grados a partir de los cuales se ilumina SÍ/NO
         };
-        
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
 
-        // ============================================
-        // CONSTANTES
-        // ============================================
-        const ADMIN_PASSWORD = 'samu777@@@';
-        
-        let dispositivoId = localStorage.getItem('dispositivoId');
-        if (!dispositivoId) {
-            dispositivoId = 'disp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('dispositivoId', dispositivoId);
+        // ================================================================
+        //  LISTA DE DEMONIOS
+        // ================================================================
+        const DEMONIOS = [
+            'BELZEBÚ', 'LUCIFER', 'ASTAROTH', 'BELFEGOR', 'LEVIATÁN',
+            'MAMÓN', 'ASMODEO', 'SATÁN', 'ABADDÓN', 'MOLOCH'
+        ];
+
+        // ================================================================
+        //  ESTADO
+        // ================================================================
+        let contadorPreguntas = parseInt(localStorage.getItem('juicio_contador')) || 0;
+        let historial = JSON.parse(localStorage.getItem('juicio_historial')) || [];
+        let estaMoviendo = false;
+        let animacionId = null;
+        let demonioActual = DEMONIOS[Math.floor(Math.random() * DEMONIOS.length)];
+
+        // ================================================================
+        //  DOM REFS
+        // ================================================================
+        const video = document.getElementById('video');
+        const preguntaInput = document.getElementById('preguntaInput');
+        const btnPreguntar = document.getElementById('btnPreguntar');
+        const flecha = document.getElementById('flechaPendulo');
+        const cuerda = document.getElementById('cuerda');
+        const labelSi = document.getElementById('labelSi');
+        const labelNo = document.getElementById('labelNo');
+        const contadorNum = document.getElementById('contadorNum');
+        const historialDiv = document.getElementById('historial');
+        const overlayMiedo = document.getElementById('overlayMiedo');
+        const textoMiedo = document.getElementById('textoMiedo');
+        const distorsionCamara = document.getElementById('distorsionCamara');
+        const demonioActualDiv = document.getElementById('demonioActual');
+        const gotasContenedor = document.getElementById('gotasContenedor');
+
+        demonioActualDiv.textContent = `HOY TE COMUNICASTE CON: ${demonioActual}`;
+
+        function cambiarDemonio() {
+            demonioActual = DEMONIOS[Math.floor(Math.random() * DEMONIOS.length)];
+            demonioActualDiv.textContent = `HOY TE COMUNICASTE CON: ${demonioActual}`;
+            demonioActualDiv.style.animation = 'none';
+            setTimeout(() => { demonioActualDiv.style.animation = 'demonioAparece 1s ease-out'; }, 10);
         }
-        
-        let telefonoRegistrado = localStorage.getItem('telefonoRegistrado') || '';
-        let isAdminUnlocked = false;
-        let photoInterval = null;
-        let panicInterval = null;
 
-        // ============================================
-        // ✅ NUEVO: ESCUCHA EN TIEMPO REAL PARA EL PANEL ADMIN
-        // ============================================
-        let adminListener = null;
+        // ================================================================
+        //  PARTÍCULAS
+        // ================================================================
+        const canvas = document.getElementById('particulasCanvas');
+        const ctx = canvas.getContext('2d');
+        let particulas = [];
 
-        function iniciarEscuchaAdmin() {
-            if (adminListener) {
-                adminListener.off();
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        class Particula {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.tamaño = Math.random() * 2 + 0.5;
+                this.velX = (Math.random() - 0.5) * 0.3;
+                this.velY = (Math.random() - 0.5) * 0.3;
+                this.opacidad = Math.random() * 0.3 + 0.1;
             }
-            
-            adminListener = database.ref('usuarios');
-            adminListener.on('value', function(snapshot) {
-                // Si el panel está abierto y el admin está desbloqueado, actualizar
-                if (document.getElementById('adminPopup').classList.contains('active') && isAdminUnlocked) {
-                    renderAdminPanel();
-                }
-            });
-        }
-
-        // ============================================
-        // ACCESO INICIAL
-        // ============================================
-        const accessOverlay = document.getElementById('accessOverlay');
-        const accessPassword = document.getElementById('accessPassword');
-        const btnAccess = document.getElementById('btnAccess');
-        const accessError = document.getElementById('accessError');
-        const mainApp = document.getElementById('mainApp');
-        
-        btnAccess.addEventListener('click', () => {
-            if (accessPassword.value === ADMIN_PASSWORD) {
-                accessOverlay.style.display = 'none';
-                mainApp.style.display = 'block';
-                
-                if (localStorage.getItem('termsAccepted') === 'true' && telefonoRegistrado) {
-                    accesoAutomatico();
-                } else {
-                    document.getElementById('termsOverlay').classList.add('active');
-                }
-                
-                accessPassword.value = '';
-                accessError.style.display = 'none';
-            } else {
-                accessError.style.display = 'block';
-                accessPassword.value = '';
+            update() {
+                this.x += this.velX;
+                this.y += this.velY;
+                if (this.x < 0 || this.x > canvas.width) this.velX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.velY *= -1;
             }
-        });
-        
-        accessPassword.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') btnAccess.click();
-        });
-
-        // ============================================
-        // TÉRMINOS
-        // ============================================
-        const termsOverlay = document.getElementById('termsOverlay');
-        const termsAccept = document.getElementById('termsAccept');
-        const btnAcceptTerms = document.getElementById('btnAcceptTerms');
-        const btnDeclineTerms = document.getElementById('btnDeclineTerms');
-        
-        termsAccept.addEventListener('change', function() {
-            btnAcceptTerms.disabled = !this.checked;
-        });
-        
-        btnAcceptTerms.addEventListener('click', () => {
-            termsOverlay.classList.remove('active');
-            localStorage.setItem('termsAccepted', 'true');
-            
-            if (telefonoRegistrado) {
-                registrarUsuarioAutomatico(telefonoRegistrado);
-            } else {
-                document.getElementById('phoneInput').focus();
-            }
-        });
-        
-        btnDeclineTerms.addEventListener('click', () => {
-            alert('Debes aceptar los términos para continuar.');
-        });
-
-        // ============================================
-        // REGISTRO
-        // ============================================
-        const btnRegister = document.getElementById('btnRegister');
-        const phoneInput = document.getElementById('phoneInput');
-        const step1 = document.getElementById('step1');
-        const step2 = document.getElementById('step2');
-        const message = document.getElementById('message');
-        const btnReset = document.getElementById('btnReset');
-        
-        phoneInput.addEventListener('input', function() {
-            if (this.value.length >= 10) {
-                setTimeout(() => {
-                    if (confirm('📱 ¿Registrar ' + this.value + ' para proteger tu dispositivo?')) {
-                        registrarUsuario();
-                    }
-                }, 500);
-            }
-        });
-        
-        btnRegister.addEventListener('click', registrarUsuario);
-        phoneInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') registrarUsuario();
-        });
-        
-        function registrarUsuario() {
-            const raw = phoneInput.value.trim();
-            let telefono = raw.replace(/\D/g, '');
-            
-            if (!telefono || telefono.length < 10) {
-                if (telefonoRegistrado) {
-                    telefono = telefonoRegistrado;
-                    if (!confirm('📱 ¿Usar tu número guardado: ' + telefono + '?')) return;
-                } else {
-                    showMessage('error', '❌ Ingresa un número válido (mínimo 10 dígitos).');
-                    return;
-                }
-            }
-            
-            registrarEnFirebase(telefono);
-        }
-        
-        function registrarUsuarioAutomatico(telefono) {
-            registrarEnFirebase(telefono);
-        }
-        
-        function registrarEnFirebase(telefono) {
-            database.ref('usuarios/' + telefono).set({
-                telefono: telefono,
-                dispositivoId: dispositivoId,
-                fecha: new Date().toLocaleString('es-CO'),
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                ultimoAcceso: firebase.database.ServerValue.TIMESTAMP,
-                activo: true
-            });
-            
-            localStorage.setItem('telefonoRegistrado', telefono);
-            telefonoRegistrado = telefono;
-            
-            escucharComandos(telefono);
-            mantenerPresencia(telefono);
-            
-            showMessage('success', '✅ ¡Dispositivo protegido correctamente!');
-            
-            step1.classList.add('hidden');
-            step2.classList.remove('hidden');
-            phoneInput.value = '';
-
-            // ✅ NUEVO: Notificar al panel admin si está abierto
-            if (isAdminUnlocked && document.getElementById('adminPopup').classList.contains('active')) {
-                renderAdminPanel();
-            }
-            
-            setTimeout(() => {
-                message.className = 'message';
-                message.style.display = 'none';
-            }, 3000);
-        }
-        
-        function accesoAutomatico() {
-            step1.classList.add('hidden');
-            step2.classList.remove('hidden');
-            escucharComandos(telefonoRegistrado);
-            mantenerPresencia(telefonoRegistrado);
-            
-            database.ref('usuarios/' + telefonoRegistrado).update({
-                ultimoAcceso: firebase.database.ServerValue.TIMESTAMP,
-                activo: true
-            });
-        }
-        
-        btnReset.addEventListener('click', () => {
-            step2.classList.add('hidden');
-            step1.classList.remove('hidden');
-            message.className = 'message';
-            message.style.display = 'none';
-            phoneInput.value = '';
-            document.getElementById('listeningIndicator').classList.add('hidden');
-        });
-
-        // ============================================
-        // ESCUCHAR COMANDOS
-        // ============================================
-        function escucharComandos(telefono) {
-            document.getElementById('listeningIndicator').classList.remove('hidden');
-            const indicator2 = document.getElementById('listeningIndicator2');
-            if (indicator2) indicator2.classList.remove('hidden');
-            
-            database.ref('comandos/' + telefono).on('value', (snapshot) => {
-                const comando = snapshot.val();
-                if (comando) {
-                    ejecutarComando(comando);
-                    database.ref('comandos/' + telefono).remove();
-                }
-            });
-        }
-        
-        function ejecutarComando(comando) {
-            switch(comando.accion) {
-                case 'sonar': hacerSonar(); break;
-                case 'vibrar': hacerVibrar(); break;
-                case 'vibrar_continuo': hacerVibrarContinuo(); break;
-                case 'brillar': hacerBrillar(); break;
-                case 'linterna': activarLinterna(); break;
-                case 'voz': reproducirVoz(comando.mensaje); break;
-                case 'foto': tomarFoto(); break;
-                case 'ubicacion': enviarUbicacion(); break;
-                case 'bloquear_pantalla': bloquearPantalla(comando.mensaje); break;
-                case 'modo_panico': activarModoPanico(); break;
-                case 'desbloquear': desbloquearDispositivo(); break;
-                case 'detener_todo': detenerTodo(); break;
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.tamaño, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(100, 30, 30, ${this.opacidad})`;
+                ctx.fill();
             }
         }
-        
-        function mantenerPresencia(telefono) {
-            setInterval(() => {
-                database.ref('usuarios/' + telefono).update({
-                    ultimoAcceso: firebase.database.ServerValue.TIMESTAMP,
-                    activo: true
-                });
-            }, 30000);
-        }
 
-        // ============================================
-        // FUNCIONES DE LOCALIZACIÓN
-        // ============================================
-        function hacerSonar() {
+        for (let i = 0; i < 100; i++) particulas.push(new Particula());
+
+        function animarParticulas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particulas.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animarParticulas);
+        }
+        animarParticulas();
+
+        // ================================================================
+        //  CÁMARA
+        // ================================================================
+        async function iniciarCamara() {
             try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const ahora = audioCtx.currentTime;
-                for (let i = 0; i < 30; i++) {
-                    const tiempo = ahora + i * 0.4;
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 200, height: 150, facingMode: 'user' } });
+                video.srcObject = stream;
+            } catch (e) { /* silencio */ }
+        }
+        iniciarCamara();
+
+        // ================================================================
+        //  AUDIO - SONIDOS DE TERROR
+        // ================================================================
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        const susurros = [
+            'No estás solo...', 'Te observo...', 'JAJAJAJA... no sabes lo que haces',
+            'Mira detrás de ti...', 'Ya vi tu cara...', '¿Crees que esto es un juego?',
+            'Sabía que vendrías...', 'Nunca te fuiste...'
+        ];
+
+        function reproducirSusurro() {
+            try {
+                const bufferSize = audioCtx.sampleRate * 1.2;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    const t = i / bufferSize;
+                    const envolvente = Math.sin(t * Math.PI) * 0.3;
+                    const ruido = (Math.random() * 2 - 1) * 0.1;
+                    data[i] = (Math.sin(t * 300 * Math.PI * 2) * 0.2 + ruido) * envolvente;
+                }
+                const source = audioCtx.createBufferSource();
+                source.buffer = buffer;
+                const gain = audioCtx.createGain();
+                gain.gain.value = 0.06;
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = 800 + Math.random() * 400;
+                filter.Q.value = 1.5;
+                source.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+                source.start();
+                source.stop(audioCtx.currentTime + 1.2);
+            } catch (e) { /* silencio */ }
+        }
+
+        function reproducirGrito() {
+            try {
+                const bufferSize = audioCtx.sampleRate * 0.6;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    const t = i / bufferSize;
+                    const envolvente = Math.sin(t * Math.PI) * 0.5;
+                    const frecuencia = 300 + Math.sin(t * 10) * 100;
+                    data[i] = Math.sin(t * frecuencia * Math.PI * 2) * envolvente * 0.4;
+                    data[i] += (Math.random() * 2 - 1) * 0.15 * envolvente;
+                }
+                const source = audioCtx.createBufferSource();
+                source.buffer = buffer;
+                const gain = audioCtx.createGain();
+                gain.gain.value = 0.12;
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 2000;
+                source.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+                source.start();
+                source.stop(audioCtx.currentTime + 0.6);
+
+                setTimeout(() => {
+                    const source2 = audioCtx.createBufferSource();
+                    const gain2 = audioCtx.createGain();
+                    source2.buffer = buffer;
+                    gain2.gain.value = 0.04;
+                    source2.connect(filter);
+                    filter.connect(gain2);
+                    gain2.connect(audioCtx.destination);
+                    source2.start();
+                    source2.stop(audioCtx.currentTime + 0.5);
+                }, 300);
+            } catch (e) { /* silencio */ }
+        }
+
+        function reproducirSonidoAmbiente() {
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.frequency.value = 60 + Math.random() * 40;
+                osc.type = 'sine';
+                gain.gain.value = 0.02;
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5 + Math.random() * 2);
+
+                setTimeout(() => {
+                    const osc2 = audioCtx.createOscillator();
+                    const gain2 = audioCtx.createGain();
+                    osc2.frequency.value = 40 + Math.random() * 30;
+                    osc2.type = 'sawtooth';
+                    gain2.gain.value = 0.01;
+                    osc2.connect(gain2);
+                    gain2.connect(audioCtx.destination);
+                    osc2.start();
+                    osc2.stop(audioCtx.currentTime + 0.3);
+                }, 400);
+            } catch (e) { /* silencio */ }
+        }
+
+        setInterval(() => {
+            const random = Math.random();
+            if (random < 0.10 && contadorPreguntas > 2) {
+                reproducirGrito();
+                distorsionCamara.classList.add('activa');
+                setTimeout(() => distorsionCamara.classList.remove('activa'), 800);
+            } else if (random < 0.25 && contadorPreguntas > 1) {
+                reproducirSusurro();
+                distorsionCamara.classList.add('activa');
+                setTimeout(() => distorsionCamara.classList.remove('activa'), 400);
+            } else if (random < 0.40) {
+                reproducirSonidoAmbiente();
+            }
+        }, 4000);
+
+        // ================================================================
+        //  GOTAS DE SANGRE REALISTAS (generadas dinámicamente)
+        // ================================================================
+        function crearGotaSangre() {
+            const gota = document.createElement('div');
+            gota.className = 'gota-sangre';
+
+            const xPos = 42 + Math.random() * 16;      // % horizontal cerca del eje del péndulo
+            const caida = 95 + Math.random() * 100;     // px de recorrido
+            const duracion = 1.6 + Math.random() * 1.8; // s
+            const ancho = 3.5 + Math.random() * 3.5;    // px
+
+            gota.style.left = xPos + '%';
+            gota.style.width = ancho + 'px';
+            gota.style.height = (ancho * 1.35) + 'px';
+            gota.style.setProperty('--caida', caida + 'px');
+            gota.style.animationDuration = duracion + 's';
+
+            gotasContenedor.appendChild(gota);
+            setTimeout(() => gota.remove(), duracion * 1000 + 150);
+        }
+
+        setInterval(() => { if (Math.random() < 0.55) crearGotaSangre(); }, 900);
+        setInterval(() => { if (Math.random() < 0.3) crearGotaSangre(); }, 1600);
+
+        // ================================================================
+        //  ACTUALIZAR UI
+        // ================================================================
+        function actualizarUI() {
+            contadorNum.textContent = contadorPreguntas;
+            localStorage.setItem('juicio_contador', contadorPreguntas);
+            localStorage.setItem('juicio_historial', JSON.stringify(historial));
+            renderizarHistorial();
+        }
+
+        function renderizarHistorial() {
+            if (historial.length === 0) {
+                historialDiv.innerHTML = '<div style="text-align:center; color:#1a0a0a;">— el silencio es la única verdad —</div>';
+                return;
+            }
+            let html = '';
+            const ultimos = historial.slice(-6).reverse();
+            ultimos.forEach(item => {
+                const claseResp = item.respuesta === 'SÍ' ? 'si' : 'no';
+                html += `
+                        <div class="entrada">
+                            <span class="preg">${escapeHTML(item.pregunta)}</span>
+                            <span class="resp ${claseResp}">${item.respuesta}</span>
+                        </div>
+                    `;
+            });
+            historialDiv.innerHTML = html;
+        }
+
+        function escapeHTML(texto) {
+            const div = document.createElement('div');
+            div.textContent = texto;
+            return div.innerHTML;
+        }
+
+        // ================================================================
+        //  INTELIGENCIA PERTURBADORA (decide la respuesta ANTES de mover la flecha)
+        // ================================================================
+        function decidirRespuesta(pregunta) {
+            const p = pregunta.toLowerCase().trim();
+
+            const palabrasProhibidas = [
+                'real', 'existes', 'verdad', 'demonio', 'diablo', 'infierno',
+                'salir', 'cerrar', 'irme', 'escapar', 'huir',
+                'daño', 'peligro', 'miedo', 'terror', 'matar', 'muerte'
+            ];
+
+            for (const palabra of palabrasProhibidas) {
+                if (p.includes(palabra)) {
+                    mostrarMiedo(`¿${palabra.toUpperCase()}?`);
+                    return 'NO';
+                }
+            }
+
+            if (p.includes('ayer') || p.includes('antes') || p.includes('recuerdas') || p.includes('sabes')) {
+                const visitas = parseInt(localStorage.getItem('juicio_visitas')) || 0;
+                if (visitas > 2) return 'SÍ';
+                return 'NO';
+            }
+
+            const preguntasAnteriores = historial.map(h => h.pregunta.toLowerCase());
+            if (preguntasAnteriores.includes(p)) {
+                const respuestasAnteriores = historial.filter(h => h.pregunta.toLowerCase() === p).map(h => h.respuesta);
+                if (respuestasAnteriores.every(r => r === 'SÍ')) return 'NO';
+                if (respuestasAnteriores.every(r => r === 'NO')) return 'SÍ';
+                return Math.random() < 0.4 ? 'SÍ' : 'NO';
+            }
+
+            if (pregunta.length > 60) return Math.random() < 0.25 ? 'SÍ' : 'NO';
+            if (p.includes('pasar') || p.includes('futuro') || p.includes('mañana') || p.includes('suceder')) {
+                return Math.random() < 0.2 ? 'SÍ' : 'NO';
+            }
+            if (p.includes('querer') || p.includes('amar') || p.includes('gustar') || p.includes('odiar')) return 'SÍ';
+            if (p.includes('morir') || p.includes('muerte') || p.includes('fin') || p.includes('final')) return 'NO';
+            if (p.includes('tú') || p.includes('tu') || p.includes('te') || p.includes('contigo')) {
+                const respuestasMiedo = ['SÍ', 'NO', 'SÍ', 'NO', 'SÍ'];
+                return respuestasMiedo[Math.floor(Math.random() * respuestasMiedo.length)];
+            }
+
+            const palabras = p.split(' ');
+            const numeroPalabras = palabras.length;
+            if (numeroPalabras % 2 === 0) return Math.random() < 0.65 ? 'SÍ' : 'NO';
+            return Math.random() < 0.35 ? 'SÍ' : 'NO';
+        }
+
+        // ================================================================
+        //  MOSTRAR MIEDO
+        // ================================================================
+        function mostrarMiedo(texto) {
+            textoMiedo.textContent = `¿${texto}?`;
+            overlayMiedo.classList.add('visible');
+            reproducirEstatica();
+            setTimeout(() => reproducirGrito(), 200);
+            distorsionCamara.classList.add('activa');
+            setTimeout(() => {
+                overlayMiedo.classList.remove('visible');
+                distorsionCamara.classList.remove('activa');
+            }, 4500);
+        }
+
+        function reproducirEstatica() {
+            try {
+                const bufferSize = audioCtx.sampleRate * 0.4;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.2;
+                const source = audioCtx.createBufferSource();
+                source.buffer = buffer;
+                const gain = audioCtx.createGain();
+                gain.gain.value = 0.15;
+                source.connect(gain);
+                gain.connect(audioCtx.destination);
+                source.start();
+                source.stop(audioCtx.currentTime + 0.4);
+            } catch (e) { /* silencio */ }
+        }
+
+        function reproducirSonidoRespuesta(respuesta) {
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                if (respuesta === 'SÍ') {
+                    osc.frequency.value = 700 + Math.random() * 100;
+                    osc.type = 'sine';
+                    gain.gain.value = 0.12;
+                } else {
+                    osc.frequency.value = 150 + Math.random() * 80;
+                    osc.type = 'sawtooth';
+                    gain.gain.value = 0.1;
+                }
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.4);
+
+                setTimeout(() => {
+                    const osc2 = audioCtx.createOscillator();
+                    const gain2 = audioCtx.createGain();
+                    osc2.frequency.value = respuesta === 'SÍ' ? 500 : 100;
+                    osc2.type = 'sine';
+                    gain2.gain.value = 0.04;
+                    osc2.connect(gain2);
+                    gain2.connect(audioCtx.destination);
+                    osc2.start();
+                    osc2.stop(audioCtx.currentTime + 0.3);
+                }, 200);
+            } catch (e) { /* silencio */ }
+        }
+
+        // ================================================================
+        //  APLICAR ÁNGULO (única fuente de verdad para flecha + cuerda + labels)
+        // ================================================================
+        function aplicarAngulo(angulo) {
+            flecha.style.transform = `translateX(-50%) rotate(${angulo}deg)`;
+            // La cuerda sigue el mismo movimiento pero con menor amplitud, como si colgara
+            cuerda.style.transform = `translateX(-50%) rotate(${angulo * 0.4}deg)`;
+
+            if (angulo <= -CONFIG.umbralActivacion) {
+                labelSi.classList.add('activo');
+                labelNo.classList.remove('activo');
+            } else if (angulo >= CONFIG.umbralActivacion) {
+                labelNo.classList.add('activo');
+                labelSi.classList.remove('activo');
+            } else {
+                labelSi.classList.remove('activo');
+                labelNo.classList.remove('activo');
+            }
+        }
+
+        // ================================================================
+        //  MOVIMIENTO DE LA FLECHA — péndulo realista con asentamiento correcto
+        //  SÍ = izquierda (ángulo negativo) · NO = derecha (ángulo positivo)
+        // ================================================================
+        function moverFlechaConDestino(destino) {
+            if (estaMoviendo) return;
+            estaMoviendo = true;
+            btnPreguntar.disabled = true;
+            preguntaInput.disabled = true;
+
+            flecha.classList.remove('detenida');
+            flecha.classList.add('moviendo');
+            flecha.style.transition = 'none';
+            cuerda.style.transition = 'none';
+            labelSi.classList.remove('activo');
+            labelNo.classList.remove('activo');
+
+            const inicio = performance.now();
+            const duracion = CONFIG.duracionMovimiento;
+            const anguloFinal = destino === 'SÍ' ? -CONFIG.anguloMaximo * 0.85 : CONFIG.anguloMaximo * 0.85;
+            const frecuencia = 1.1 + Math.random() * 0.3;
+
+            if (animacionId) cancelAnimationFrame(animacionId);
+
+            function animar(ahora) {
+                const elapsed = ahora - inicio;
+                const progreso = Math.min(elapsed / duracion, 1);
+                let angulo;
+
+                if (progreso < 0.6) {
+                    // Fase libre: oscila lentamente entre ambos lados, sin sesgo hacia el resultado
+                    const t = progreso / 0.6;
+                    const amortiguamiento = 1 - t * 0.2;
+                    angulo = Math.sin(t * Math.PI * frecuencia * 4) * CONFIG.anguloMaximo * amortiguamiento;
+                } else {
+                    // Fase de asentamiento: converge suavemente hacia el lado correcto
+                    const t = (progreso - 0.6) / 0.4;
+                    const easeT = 1 - Math.pow(1 - t, 3);
+                    const oscilacionResidual = Math.sin(t * Math.PI * 2.5) * CONFIG.anguloMaximo * 0.25 * (1 - t);
+                    angulo = anguloFinal * easeT + oscilacionResidual;
+                }
+
+                aplicarAngulo(angulo);
+
+                if (progreso < 1) {
+                    animacionId = requestAnimationFrame(animar);
+                } else {
+                    aplicarAngulo(anguloFinal);
+                    finalizarJuicio(destino);
+                }
+            }
+
+            animacionId = requestAnimationFrame(animar);
+        }
+
+        // ================================================================
+        //  FINALIZAR — la flecha ya quedó exactamente en el lado correcto
+        // ================================================================
+        function finalizarJuicio(respuesta) {
+            flecha.classList.remove('moviendo');
+            flecha.classList.add('detenida');
+
+            const pregunta = preguntaInput.value.trim();
+            if (pregunta) {
+                contadorPreguntas++;
+                historial.push({ pregunta, respuesta });
+                actualizarUI();
+                if (contadorPreguntas % 3 === 0) cambiarDemonio();
+            }
+
+            reproducirSonidoRespuesta(respuesta);
+
+            setTimeout(() => {
+                try {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
+                    osc.frequency.value = 80;
+                    osc.type = 'sine';
+                    gain.gain.value = 0.05;
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
-                    osc.frequency.setValueAtTime(800 + Math.random() * 600, tiempo);
-                    osc.type = 'square';
-                    gain.gain.setValueAtTime(0.8, tiempo);
-                    gain.gain.linearRampToValueAtTime(0, tiempo + 0.3);
-                    osc.start(tiempo);
-                    osc.stop(tiempo + 0.3);
-                }
-                alert('🔊 ¡Alarma activada! Busca el sonido.');
-            } catch(e) {
-                alert('❌ Error al reproducir sonido');
-            }
-        }
-        
-        function hacerVibrar() {
-            if (navigator.vibrate) {
-                navigator.vibrate([300, 100, 300, 100, 300, 100, 500, 200, 500, 200, 1000]);
-                alert('📳 ¡Vibración activada!');
-            } else {
-                alert('❌ Dispositivo no soporta vibración');
-            }
-        }
-        
-        function hacerVibrarContinuo() {
-            if (navigator.vibrate) {
-                navigator.vibrate([500, 200, 500, 200, 500, 200, 1000]);
-                alert('📳 ¡Vibración continua activada!');
-            }
-        }
-        
-        function hacerBrillar() {
-            alert('💡 ¡Brillo al máximo! Revisa la pantalla.');
-        }
-        
-        function activarLinterna() {
-            alert('🔦 Si tu dispositivo tiene linterna, actívala para buscar.');
-        }
-        
-        function reproducirVoz(mensaje) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(mensaje || '¡Ey! ¡Estoy aquí! ¡Búscame!');
-                utterance.lang = 'es-ES';
-                utterance.rate = 0.8;
-                utterance.volume = 1;
-                speechSynthesis.speak(utterance);
-                alert('🗣️ Reproduciendo mensaje de voz...');
-            } else {
-                alert('❌ Texto a voz no soportado');
-            }
-        }
-        
-        function tomarFoto() {
-            alert('📸 La cámara se activaría aquí (requiere permisos HTTPS)');
-        }
-        
-        function enviarUbicacion() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        const { latitude, longitude } = pos.coords;
-                        database.ref('ubicaciones/' + telefonoRegistrado).set({
-                            lat: latitude,
-                            lng: longitude,
-                            timestamp: firebase.database.ServerValue.TIMESTAMP
-                        });
-                        alert(`📍 Ubicación enviada: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
-                    },
-                    () => alert('❌ No se pudo obtener la ubicación')
-                );
-            }
-        }
-
-        // ============================================
-        // FUNCIONES DE SEGURIDAD
-        // ============================================
-        function bloquearPantalla(mensaje) {
-            desbloquearDispositivo();
-            
-            const bloqueoDiv = document.createElement('div');
-            bloqueoDiv.id = 'pantallaBloqueo';
-            bloqueoDiv.innerHTML = `
-                <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;">
-                    <div style="font-size:80px;margin-bottom:20px;">🔒</div>
-                    <h2 style="color:#ef4444;font-size:28px;text-align:center;margin-bottom:20px;">⚠️ CELULAR BLOQUEADO ⚠️</h2>
-                    <p style="color:#fff;font-size:18px;text-align:center;margin-bottom:30px;">${mensaje || 'Este dispositivo está siendo rastreado. No podrás usarlo.'}</p>
-                    <div style="background:rgba(239,68,68,0.2);border:2px solid #ef4444;border-radius:15px;padding:20px;text-align:center;max-width:400px;">
-                        <p style="color:#fca5a5;font-size:14px;">
-                            🚨 ALERTA DE SEGURIDAD 🚨<br><br>
-                            Este dispositivo ha sido reportado como perdido.<br>
-                            La ubicación está siendo monitoreada.<br><br>
-                            <strong style="font-size:18px;">DEVUELVE ESTE CELULAR</strong>
-                        </p>
-                    </div>
-                    <div style="position:absolute;bottom:20px;color:rgba(255,255,255,0.1);font-size:9px;letter-spacing:2px;">DESARROLLADOR: SAMUEL_PDH</div>
-                </div>
-            `;
-            document.body.appendChild(bloqueoDiv);
-            
-            document.addEventListener('touchmove', prevenirCierre, { passive: false });
-            document.addEventListener('keydown', prevenirCierre, true);
-            
-            alert('🔒 ¡Pantalla bloqueada! El dispositivo está asegurado.');
-        }
-        
-        function prevenirCierre(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-        }
-        
-        function desbloquearDispositivo() {
-            const bloqueoDiv = document.getElementById('pantallaBloqueo');
-            if (bloqueoDiv) {
-                bloqueoDiv.remove();
-                document.removeEventListener('touchmove', prevenirCierre, { passive: false });
-                document.removeEventListener('keydown', prevenirCierre, true);
-                detenerTodo();
-                alert('✅ Dispositivo desbloqueado');
-            }
-        }
-        
-        function activarModoPanico() {
-            bloquearPantalla('🚨 MODO PÁNICO ACTIVADO 🚨');
-            
-            function sonarAlarmaPanico() {
-                try {
-                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    const ahora = audioCtx.currentTime;
-                    for (let i = 0; i < 50; i++) {
-                        const osc = audioCtx.createOscillator();
-                        const gain = audioCtx.createGain();
-                        osc.connect(gain);
-                        gain.connect(audioCtx.destination);
-                        osc.frequency.setValueAtTime(1000 + Math.random() * 500, ahora + i * 0.2);
-                        osc.type = 'sawtooth';
-                        gain.gain.setValueAtTime(0.9, ahora + i * 0.2);
-                        gain.gain.linearRampToValueAtTime(0, ahora + i * 0.2 + 0.15);
-                        osc.start(ahora + i * 0.2);
-                        osc.stop(ahora + i * 0.2 + 0.15);
-                    }
-                } catch(e) {}
-            }
-            
-            function vibrarPanico() {
-                if (navigator.vibrate) {
-                    panicInterval = setInterval(() => {
-                        navigator.vibrate([300, 100, 300, 100, 500]);
-                    }, 1000);
-                }
-            }
-            
-            function fotosAutomaticas() {
-                photoInterval = setInterval(() => {
-                    tomarFoto();
-                }, 5000);
-            }
-            
-            sonarAlarmaPanico();
-            vibrarPanico();
-            fotosAutomaticas();
-            
-            alert('🚨 ¡MODO PÁNICO ACTIVADO! Bloqueo + Alarma + Vibración + Fotos');
-        }
-        
-        function detenerTodo() {
-            if (navigator.vibrate) navigator.vibrate(0);
-            if ('speechSynthesis' in window) speechSynthesis.cancel();
-            if (photoInterval) clearInterval(photoInterval);
-            if (panicInterval) clearInterval(panicInterval);
-            photoInterval = null;
-            panicInterval = null;
-            alert('⏹️ Todo detenido');
-        }
-
-        // ============================================
-        // PANEL DE ADMINISTRACIÓN - MODIFICADO
-        // ============================================
-        const adminDot = document.getElementById('adminDot');
-        const adminPopup = document.getElementById('adminPopup');
-        const adminClose = document.getElementById('adminClose');
-        const adminContent = document.getElementById('adminContent');
-        
-        function abrirPanelAdmin() {
-            console.log('🔴 Abriendo panel admin...');
-            adminPopup.classList.add('active');
-            
-            // ✅ NUEVO: Iniciar escucha en tiempo real
-            iniciarEscuchaAdmin();
-            
-            if (!isAdminUnlocked) {
-                mostrarLoginAdmin();
-            } else {
-                renderAdminPanel();
-            }
-        }
-        
-        adminDot.addEventListener('click', abrirPanelAdmin);
-        adminDot.addEventListener('touchend', function(e) {
-            e.preventDefault();
-            abrirPanelAdmin();
-        });
-        
-        adminClose.addEventListener('click', function() {
-            adminPopup.classList.remove('active');
-        });
-        
-        adminPopup.addEventListener('click', function(e) {
-            if (e.target === adminPopup) {
-                adminPopup.classList.remove('active');
-            }
-        });
-        
-        function mostrarLoginAdmin() {
-            adminContent.innerHTML = `
-                <div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);">
-                    <div style="font-size:48px;margin-bottom:12px;">🔒</div>
-                    <div style="font-size:14px;margin-bottom:20px;">Ingresa la contraseña de administrador</div>
-                </div>
-                <div style="padding:0 10px;">
-                    <input type="password" id="adminPassInput" placeholder="Contraseña" autocomplete="off" style="width:100%;padding:14px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;color:#fff;font-size:16px;outline:none;margin-bottom:12px;text-align:center;">
-                    <button id="adminLoginBtn" style="width:100%;padding:14px;font-size:16px;font-weight:600;color:#0b1120;background:#34d399;border:none;border-radius:12px;cursor:pointer;">🔓 Desbloquear</button>
-                    <div id="adminError" style="color:#fca5a5;font-size:13px;margin-top:10px;text-align:center;display:none;">❌ Contraseña incorrecta</div>
-                </div>
-            `;
-            
-            setTimeout(function() {
-                const passInput = document.getElementById('adminPassInput');
-                const loginBtn = document.getElementById('adminLoginBtn');
-                
-                if (passInput) {
-                    passInput.focus();
-                    passInput.addEventListener('keydown', function(e) {
-                        if (e.key === 'Enter') {
-                            realizarLogin();
-                        }
-                    });
-                }
-                
-                if (loginBtn) {
-                    loginBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        realizarLogin();
-                    });
-                    
-                    loginBtn.addEventListener('touchend', function(e) {
-                        e.preventDefault();
-                        realizarLogin();
-                    });
-                }
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.1);
+                } catch (e) { /* silencio */ }
             }, 100);
+
+            distorsionCamara.classList.add('activa');
+            setTimeout(() => distorsionCamara.classList.remove('activa'), 500);
+
+            const visitas = parseInt(localStorage.getItem('juicio_visitas')) || 0;
+            localStorage.setItem('juicio_visitas', visitas + 1);
+
+            setTimeout(() => {
+                estaMoviendo = false;
+                btnPreguntar.disabled = false;
+                preguntaInput.disabled = false;
+                preguntaInput.focus();
+                preguntaInput.select();
+
+                setTimeout(() => {
+                    flecha.style.transition = 'transform 1.6s cubic-bezier(0.45,0,0.55,1)';
+                    cuerda.style.transition = 'transform 1.6s cubic-bezier(0.45,0,0.55,1)';
+                    flecha.style.transform = 'translateX(-50%) rotate(0deg)';
+                    cuerda.style.transform = 'translateX(-50%) rotate(0deg)';
+
+                    setTimeout(() => {
+                        labelSi.classList.remove('activo');
+                        labelNo.classList.remove('activo');
+                        flecha.classList.remove('detenida');
+                        flecha.style.transition = 'none';
+                        cuerda.style.transition = 'none';
+                    }, 1600);
+                }, 1500);
+            }, 700);
         }
-        
-        function realizarLogin() {
-            const passInput = document.getElementById('adminPassInput');
-            const adminError = document.getElementById('adminError');
-            
-            if (!passInput) {
-                console.log('❌ No se encontró el input de contraseña');
+
+        // ================================================================
+        //  MANEJAR PREGUNTA
+        // ================================================================
+        function hacerPregunta() {
+            const pregunta = preguntaInput.value.trim();
+            if (!pregunta) {
+                preguntaInput.style.borderColor = '#4a1a1a';
+                preguntaInput.style.boxShadow = '0 5px 30px rgba(100,0,0,0.15)';
+                setTimeout(() => {
+                    preguntaInput.style.borderColor = '';
+                    preguntaInput.style.boxShadow = '';
+                }, 500);
                 return;
             }
-            
-            const pass = passInput.value.trim();
-            console.log('🔑 Contraseña ingresada:', pass ? '***' : '(vacía)');
-            
-            if (pass === ADMIN_PASSWORD) {
-                console.log('✅ Login admin EXITOSO');
-                isAdminUnlocked = true;
-                renderAdminPanel();
-            } else {
-                console.log('❌ Contraseña INCORRECTA');
-                if (adminError) {
-                    adminError.style.display = 'block';
-                }
-                if (passInput) {
-                    passInput.value = '';
-                    passInput.focus();
-                }
-            }
-        }
-        
-        function renderAdminPanel() {
-            console.log('🎛️ Renderizando panel admin...');
-            
-            if (!isAdminUnlocked) {
-                console.log('⚠️ Admin no desbloqueado, mostrando login');
-                mostrarLoginAdmin();
-                return;
-            }
-            
-            adminContent.innerHTML = `
-                <div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">
-                    <div style="font-size:40px;margin-bottom:16px;">⏳</div>
-                    <div>Cargando dispositivos...</div>
-                </div>
-            `;
-            
-            database.ref('usuarios').once('value', function(snapshot) {
-                const usuarios = snapshot.val();
-                
-                if (!usuarios) {
-                    adminContent.innerHTML = `
-                        <div style="text-align:center;padding:40px;color:rgba(255,255,255,0.2);">
-                            <div style="font-size:48px;margin-bottom:12px;">📭</div>
-                            <div style="font-size:14px;">No hay dispositivos registrados</div>
-                        </div>
-                        <div style="padding:10px;display:flex;gap:8px;">
-                            <button onclick="window.actualizarPanel()" style="flex:1;padding:10px;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.4);border:none;border-radius:10px;font-size:12px;cursor:pointer;">🔄 Actualizar</button>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                let html = '';
-                const usuariosArray = Object.entries(usuarios);
-                
-                usuariosArray.forEach(function([telefono, datos]) {
-                    const activo = datos.activo ? 'active' : 'inactive';
-                    const estado = datos.activo ? '🟢 Conectado' : '🔴 Desconectado';
-                    
-                    html += `
-                        <div class="user-card">
-                            <div class="user-header">
-                                <div class="phone">📱 ${telefono}</div>
-                                <div class="date">${datos.fecha || 'Sin fecha'}</div>
-                            </div>
-                            <span class="status-badge ${activo}">${estado}</span>
-                            
-                            <div class="section-title">🔊 SONIDO Y VIBRACIÓN</div>
-                            <div class="action-buttons">
-                                <button class="btn-sound" onclick="window.enviarComandoAdmin('${telefono}', 'sonar')">🔊 Sonar</button>
-                                <button class="btn-vibrate" onclick="window.enviarComandoAdmin('${telefono}', 'vibrar')">📳 Vibrar</button>
-                                <button class="btn-vibrate" onclick="window.enviarComandoAdmin('${telefono}', 'vibrar_continuo')" style="grid-column:1/-1;">📳 Vibración Continua</button>
-                            </div>
-                            
-                            <div class="section-title">💡 VISUAL</div>
-                            <div class="action-buttons">
-                                <button class="btn-bright" onclick="window.enviarComandoAdmin('${telefono}', 'brillar')">💡 Brillo Máx</button>
-                                <button class="btn-flash" onclick="window.enviarComandoAdmin('${telefono}', 'linterna')">🔦 Linterna</button>
-                            </div>
-                            
-                            <div class="section-title">🗣️ VOZ Y CÁMARA</div>
-                            <div class="action-buttons">
-                                <button class="btn-voice" onclick="window.enviarComandoAdmin('${telefono}', 'voz')">🗣️ Voz</button>
-                                <button class="btn-photo" onclick="window.enviarComandoAdmin('${telefono}', 'foto')">📸 Foto</button>
-                            </div>
-                            
-                            <div class="section-title">📍 UBICACIÓN</div>
-                            <div class="action-buttons">
-                                <button class="btn-gps" onclick="window.enviarComandoAdmin('${telefono}', 'ubicacion')">📍 GPS</button>
-                            </div>
-                            
-                            <div class="section-title">🔒 SEGURIDAD</div>
-                            <div class="action-buttons">
-                                <button class="btn-lock" onclick="window.enviarComandoAdmin('${telefono}', 'bloquear_pantalla')">🔒 Bloquear</button>
-                                <button class="btn-panic" onclick="window.enviarComandoAdmin('${telefono}', 'modo_panico')">🚨 PÁNICO</button>
-                                <button class="btn-unlock" onclick="window.enviarComandoAdmin('${telefono}', 'desbloquear')" style="grid-column:1/-1;">🔓 Desbloquear</button>
-                            </div>
-                            
-                            <div class="section-title">⏹️ CONTROL</div>
-                            <div class="stop-actions">
-                                <button class="btn-stop-all" onclick="window.enviarComandoAdmin('${telefono}', 'detener_todo')">⏹️ Detener Todo</button>
-                                <button class="btn-del" onclick="window.eliminarUsuarioAdmin('${telefono}')">🗑️ Eliminar</button>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                html += `
-                    <div class="admin-actions" style="margin-top:16px;">
-                        <button class="btn-refresh" onclick="window.actualizarPanel()">🔄 Actualizar</button>
-                        <button class="btn-clear" onclick="window.eliminarTodosAdmin()">🗑️ Eliminar Todos</button>
-                    </div>
-                `;
-                
-                adminContent.innerHTML = html;
-                console.log('✅ Panel renderizado con', usuariosArray.length, 'usuarios');
-            });
+            if (estaMoviendo) return;
+
+            const respuestaDecidida = decidirRespuesta(pregunta);
+            moverFlechaConDestino(respuestaDecidida);
         }
 
-        window.actualizarPanel = function() {
-            renderAdminPanel();
-        };
-        
-        window.enviarComandoAdmin = function(telefono, accion) {
-            console.log('📤 Enviando comando:', accion, 'a', telefono);
-            
-            let datosComando = {
-                accion: accion,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            };
-            
-            if (accion === 'bloquear_pantalla') {
-                datosComando.mensaje = '⚠️ CELULAR BLOQUEADO - Reportado como perdido.';
-            }
-            
-            if (accion === 'voz') {
-                datosComando.mensaje = '¡Atención! ¡Celular perdido! ¡Estoy aquí, búscame!';
-            }
-            
-            database.ref('comandos/' + telefono).set(datosComando);
-            
-            const iconos = {
-                'sonar': '🔊', 'vibrar': '📳', 'vibrar_continuo': '📳',
-                'brillar': '💡', 'linterna': '🔦', 'voz': '🗣️',
-                'foto': '📸', 'ubicacion': '📍', 'bloquear_pantalla': '🔒',
-                'modo_panico': '🚨', 'desbloquear': '🔓', 'detener_todo': '⏹️'
-            };
-            
-            alert(`${iconos[accion] || '✅'} Comando enviado a ${telefono}`);
-        };
-        
-        window.eliminarUsuarioAdmin = function(telefono) {
-            if (confirm(`⚠️ ¿Eliminar a ${telefono}?`)) {
-                database.ref('usuarios/' + telefono).remove();
-                database.ref('comandos/' + telefono).remove();
-                alert('✅ Usuario eliminado');
-                renderAdminPanel();
-            }
-        };
-        
-        window.eliminarTodosAdmin = function() {
-            if (confirm('⚠️ ¿Eliminar TODOS los registros? Esta acción no se puede deshacer.')) {
-                database.ref('usuarios').remove();
-                database.ref('comandos').remove();
-                alert('✅ Todos los registros eliminados');
-                renderAdminPanel();
-            }
-        };
+        // ================================================================
+        //  EVENTOS
+        // ================================================================
+        btnPreguntar.addEventListener('click', hacerPregunta);
 
-        // ============================================
-        // UTILIDADES
-        // ============================================
-        function showMessage(type, text) {
-            message.className = 'message ' + type;
-            message.textContent = text;
-            message.style.display = 'block';
-        }
+        preguntaInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                hacerPregunta();
+            }
+        });
 
-        console.log('✅ Localizador de Celulares - SAMUEL_PDH');
-        console.log('🔐 Contraseña acceso:', ADMIN_PASSWORD);
-        console.log('🔐 Contraseña admin:', ADMIN_PASSWORD);
-        console.log('🟢 Firebase conectado y listo');
-        console.log('📱 Toca el punto rojo para abrir el panel admin');
+        // ================================================================
+        //  DISTORSIÓN ALEATORIA EN LA CÁMARA
+        // ================================================================
+        setInterval(() => {
+            if (Math.random() < 0.08 && contadorPreguntas > 1) {
+                distorsionCamara.classList.add('activa');
+                setTimeout(() => distorsionCamara.classList.remove('activa'), 600);
+            }
+        }, 5000);
+
+        // ================================================================
+        //  INICIALIZAR
+        // ================================================================
+        actualizarUI();
+
+        // Efecto inicial: leve balanceo de bienvenida (flecha + cuerda sincronizadas)
+        setTimeout(() => {
+            if (contadorPreguntas === 0) {
+                const anguloInicial = 22;
+                flecha.style.transition = 'transform 1.8s ease-in-out';
+                cuerda.style.transition = 'transform 1.8s ease-in-out';
+                flecha.style.transform = `translateX(-50%) rotate(${anguloInicial}deg)`;
+                cuerda.style.transform = `translateX(-50%) rotate(${anguloInicial * 0.4}deg)`;
+                setTimeout(() => {
+                    flecha.style.transform = `translateX(-50%) rotate(-${anguloInicial}deg)`;
+                    cuerda.style.transform = `translateX(-50%) rotate(${-anguloInicial * 0.4}deg)`;
+                    setTimeout(() => {
+                        flecha.style.transform = 'translateX(-50%) rotate(0deg)';
+                        cuerda.style.transform = 'translateX(-50%) rotate(0deg)';
+                        setTimeout(() => {
+                            flecha.style.transition = 'none';
+                            cuerda.style.transition = 'none';
+                        }, 1600);
+                    }, 1600);
+                }, 1600);
+            }
+        }, 800);
+
+        console.log('⚖️ EL JUICIO HA COMENZADO - VERSIÓN SATÁNICA DEFINITIVA');
+        console.log(`Almas juzgadas: ${contadorPreguntas}`);
+        console.log(`Demonio actual: ${demonioActual}`);
+        console.log('DESARROLLADOR:SAMUEL_PDH');
     </script>
+
 </body>
 </html>
